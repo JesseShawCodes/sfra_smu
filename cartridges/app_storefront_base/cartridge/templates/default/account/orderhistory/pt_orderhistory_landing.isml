@@ -1,0 +1,69 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<iscomment>This includes global utilities into the pages</iscomment>
+<isinclude template="util/modules"/>
+
+<iscomment>This page must be cachable. It inherits the caching attributes by the decorated template.</iscomment>
+
+<head>
+	<iscomment>
+		Include all important information globally , e.g. meta-data, link information, and
+		javascript.
+	</iscomment>
+	<isinclude template="components/header/htmlhead"/>
+
+	<iscomment>Add page type specific header information here.</iscomment>
+
+</head>
+<body>
+
+<div id="container_black" class="pt_order">
+	<div id="page">
+		
+		<isinclude url="${URLUtils.url('Home-IncludeHeader')}"/>
+		
+		<div id="main_white">
+		
+			<div id="content">
+			
+				<div class="myaccounttop">
+					<div style="">
+						<span style="">MY ACCOUNT</span>
+					</div>
+					<div style="margin:0 30px;">
+						<isif condition="${empty(pdict.Order)}">
+							<isbreadcrumbs bcurl1="${URLUtils.https('Account-Show')}" bctext1="My Account" bctext2="Order History"/>
+						<iselse>
+							<isbreadcrumbs bcurl1="${URLUtils.https('Account-Show')}" bctext1="My Account" bcurl2="${URLUtils.https('Order-History')}" bctext2="Order History" bctext3="${pdict.Order.orderNo}"/>
+						</isif>
+					</div>
+				</div>
+				
+				<div id="leftcolumn_cs">
+				
+					<isif condition="${pdict.CurrentCustomer.registered}">
+						<iscontentasset aid="account-nav-registered"/><div class="clear"></div>
+					<iselse>
+						<iscontentasset aid="account-nav-unregistered"/><div class="clear"></div>
+					</isif>
+					<iscomment>TODO bigger banner appears only once</iscomment>
+					<isif condition="${true}">
+						<div class="cs-bottom-banner"><iscontentasset aid="cs-left-bottom-banner"/></div><!-- END: cs-bottom-banner -->
+					<iselse/>
+						<div class="cs-bottom-big-banner"><iscontentasset aid="cs-big-left-bottom-banner"/></div><!-- END: cs-bottom-banner -->
+					</isif>
+					<div class="clear"><!-- FLOAT CLEAR --></div>
+					
+				</div><!-- END: leftcolumn -->
+				
+				<isreplace/>
+				
+			</div><!-- END: content -->
+			<div class="clear"><!-- FLOAT CLEAR --></div>
+		</div><!-- END: main -->
+		<isinclude template="components/footer/footer"/>
+	</div>
+</div><!-- END: container -->
+</body>
+</html>

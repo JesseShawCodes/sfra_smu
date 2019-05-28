@@ -1,0 +1,27 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<isinclude template="util/modules"/>
+<head>
+	<iscomment>Include all important information globally , e.g. meta-data, link information, and javascript.</iscomment>
+	<isinclude template="components/header/htmlhead"/>
+</head>
+<body>
+
+<div id="container_black" class="pt_account">
+	<div id="page">
+		<isinclude url="${URLUtils.url('Home-IncludeHeader')}"/>
+		<div id="main_white">
+			
+			<div id="content">
+				<div class="centered960">
+					<isreplace/>
+					<isinclude template="components/needhelp"/>
+				</div>
+			</div><!-- END: content -->
+			<div class="clear"><!-- FLOAT CLEAR --></div>
+		</div><!-- END: main -->
+		<isinclude template="components/footer/footer"/>
+	</div>
+</div><!-- END: container -->
+</body>
+</html>

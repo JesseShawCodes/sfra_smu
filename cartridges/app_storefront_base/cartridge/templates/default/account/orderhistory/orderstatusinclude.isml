@@ -1,0 +1,64 @@
+<isinclude template="util/modules"/>
+<iscomment>
+	This template renders an order's status.
+	There must be an object called 'Order' in page scope.
+</iscomment>
+	<isscript>
+	/* OrderStatus from OMS system */
+	var OrderStatusObject : Object = pdict.OrderStatusObject;
+	
+	var statusMap = {'Void':Resource.msg('orderstatusinclude.ordercanceled','account',null), 
+					'Waiting Approval':Resource.msg('orderstatusinclude.orderprocessing','account',null), 
+					'Waiting Allocation':Resource.msg('orderstatusinclude.orderprocessing','account',null), 
+					'Waiting Fulfillment':Resource.msg('orderstatusinclude.orderprocessing','account',null), 
+					'Closed':Resource.msg('orderstatusinclude.ordershipped','account',null)}
+	
+	var notes : dw.object.Note = Order.getNotes();
+	</isscript>
+				
+<div class="orderstatus">
+	<span class="label">${Resource.msg('orderstatusinclude.statuslabel','account',null)}</span>
+	<isif condition="${!empty(OrderStatusObject) && !empty(OrderStatusObject.Status)}">
+		<span class="value"><isprint value="${statusMap[OrderStatusObject.Status]}"/></span>
+	<iselseif condition="${((Order.status==dw.order.Order.ORDER_STATUS_NEW || Order.status == dw.order.Order.ORDER_STATUS_OPEN) && Order.shippingStatus == dw.order.Order.SHIPPING_STATUS_SHIPPED) || Order.status==dw.order.Order.ORDER_STATUS_COMPLETED}">
+		<span class="value order_shipped">${Resource.msg('orderstatusinclude.ordershipped','account',null)}</span>
+	<iselseif condition="${(Order.status==dw.order.Order.ORDER_STATUS_NEW || Order.status==dw.order.Order.ORDER_STATUS_OPEN) && Order.shippingStatus != dw.order.Order.SHIPPING_STATUS_SHIPPED}">
+		<!---
+			<span class="value order_processed">${Resource.msg('orderstatusinclude.orderprocessed','account',null)}</span>
+		--->
+	<iselseif condition="${Order.status==dw.order.Order.ORDER_STATUS_CANCELLED}">
+		<span class="value order_canceled">${Resource.msg('orderstatusinclude.ordercanceled','account',null)}</span>
+	<iselse>
+		<span class="value order_processed">${Resource.msg('orderstatusinclude.orderprocessed','account',null)}</span>
+	</isif>
+	
+</div><!-- END: orderstatusinclude -->
+
+<div class="tracking">
+	<label>Tracking Number<isif condition="${notes.length > 1}">s</isif></label>
+	<isloop items="${notes}" var="note">
+		<span class="trackingNum">
+			<isif condition="${note.text.substr(0, 2) == '1Z'}">
+				<iscomment>UPS Shipping</iscomment>
+				<isset name="shippingMethod" value="${note.text.substr(8, 2)}" scope="page"/>
+				<isif condition="${shippingMethod == '01' || shippingMethod == '13' || shippingMethod == '15' || shippingMethod == '32' || shippingMethod == '33' || shippingMethod == '41' || shippingMethod == '44'}">
+					UPS Next Day: 
+				<iselseif condition="${shippingMethod == '03' || shippingMethod == '22' || shippingMethod == '42' || shippingMethod == '72' || shippingMethod == '78' || shippingMethod == '90'}">
+					UPS Ground: 
+				<iselseif condition="${shippingMethod == '02'}">
+					UPS 2 Day: 
+				<iselseif condition="${shippingMethod == '12'}">
+					UPS 3 Day: 
+				<iselseif condition="${shippingMethod == '66'}">
+					UPS Express: 
+				</isif>
+				<a href="http://wwwapps.ups.com/WebTracking/track?track=yes&trackNums=${note.text}"><isprint value="${note.text}"/></a>
+			<iselseif condition="${note.text.substr(0, 2) == '94'}">
+				<iscomment>USPS Shipping</iscomment>
+				USPS Priority Mail: <a href="https://tools.usps.com/go/TrackConfirmAction_input?qtc_tLabels1=${note.text}"><isprint value="${note.text}"/></a>
+			</isif>
+		</span>
+	</isloop>
+</div>
+
+

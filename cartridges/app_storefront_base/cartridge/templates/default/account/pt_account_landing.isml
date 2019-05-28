@@ -1,0 +1,59 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<isinclude template="util/modules"/>
+<head>
+	<title>My Account - SouthMoonUnder</title>
+	<iscomment>Include all important information globally , e.g. meta-data, link information, and javascript.</iscomment>
+	<isinclude template="components/header/htmlhead"/>
+</head>
+<body>
+
+
+<div id="container_black" class="pt_account">
+	<div id="page">
+		<isinclude url="${URLUtils.url('Home-IncludeHeader')}"/>
+		<div id="main_white">
+			<div class="centered960">
+				<div id="content">
+					<div class="myaccounttop">
+						<div>
+							<span>MY ACCOUNT</span>
+						</div>
+						<div style="margin:0 30px;">
+							<isbreadcrumbs bcurl1="${URLUtils.https('Account-Show')}" bctext1="My Account" bctext2="Welcome"/>
+						</div>
+					</div>
+					
+					<div id="leftcolumn_cs">
+						<isif condition="${pdict.CurrentCustomer.registered}">
+							<iscontentasset aid="account-nav-registered"/><div class="clear"></div>
+						<iselse>
+							<iscontentasset aid="account-nav-unregistered"/><div class="clear"></div>
+						</isif>
+						<script>
+						if( navigator.userAgent.match(/Android/i) || navigator.userAgent.match(/webOS/i) || navigator.userAgent.match(/iPhone/i)
+						|| navigator.userAgent.match(/iPod/i) || navigator.userAgent.match(/BlackBerry/i) || navigator.userAgent.match(/Windows Phone/i)){
+						jQuery(document).ready(function(){
+							$(".csNavItem ul").each(function(){
+								if($(this).width() + $(this).position().left > $(window).width()){
+									$(this).css("right",0);
+								}
+							});
+						});
+						}
+						</script>
+						<div class="cs-bottom-banner"><iscontentasset aid="cs-left-bottom-banner"/></div><!-- END: cs-bottom-banner -->
+						<div class="clear"><!-- FLOAT CLEAR --></div>
+					</div><!-- END: leftcolumn -->
+					
+					<isreplace/>
+				</div>
+			</div><!-- END: content -->
+			
+			<div class="clear"><!-- FLOAT CLEAR --></div>
+		</div><!-- END: main -->
+		<isinclude template="components/footer/footer"/>
+	</div>
+</div><!-- END: container -->
+</body>
+</html>

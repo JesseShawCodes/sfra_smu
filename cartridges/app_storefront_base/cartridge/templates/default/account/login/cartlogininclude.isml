@@ -33,7 +33,7 @@
 				<div class="forgotpassword">
 					<a id="PasswordReset" title="${Resource.msg('logininclude.forgotpassword','account',null)}">${Resource.msg('logininclude.forgotpassword','account',null)}</a>
 				</div><!-- END: forgotpassword -->
-				<input type="hidden" name="${pdict.CurrentForms.login.secureKeyHtmlName}" value="${pdict.CurrentForms.login.secureKeyValue}"/>
+				<input type="hidden" name="${dw.web.Form.secureKeyHtmlName}" value="${dw.web.Form.secureKeyValue}"/>
 			</fieldset>
 		</form>
 		<div class="clear"><!-- FLOAT CLEAR --></div>

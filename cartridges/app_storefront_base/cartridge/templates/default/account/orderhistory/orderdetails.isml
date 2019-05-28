@@ -1,0 +1,31 @@
+<isdecorate template="account/orderhistory/pt_orderhistory_landing">
+
+<isinclude template="util/modules"/>
+<div class="orderdetails">
+	<isif condition="${!empty(pdict.Order)}">
+	
+		<isif condition="${!empty(pdict.statCode)}">
+			<!-- ${pdict.statCode}  -->
+		
+		</isif>
+		<h4>Order Details</h4>
+		<isorderdetails order="${pdict.Order}" orderstatus="true"/>
+		<div class="formactions">
+			<isif condition="${pdict.CurrentCustomer.authenticated}">
+				<a href="${URLUtils.https('Order-History')}" title="">${Resource.msg('orderdetails.returnorder','account',null)}</a>
+			</isif>
+			<a href="${URLUtils.httpHome()}" title="">${Resource.msg('orderdetails.returnshopping','account',null)}</a>	
+		</div><!-- END: formactions -->
+	<iselse/>
+		<isif condition="${pdict.CurrentCustomer.authenticated}">
+			<div class="back"><a href="${URLUtils.https('Order-History')}" title="">${Resource.msg('orderdetails.returnorder','account',null)}</a></div>
+		</isif>
+		<div class="notfound">${Resource.msg('orders.notfound','account',null)}</div>
+	</isif>
+	
+	<div class="grayline"></div>
+	
+	<isinclude template="components/needhelp"/>
+	
+</div><!-- END: orderdetails -->
+</isdecorate>

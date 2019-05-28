@@ -1,0 +1,128 @@
+<isdecorate template="account/wishlist/pt_wishlist"/>
+<isinclude template="util/modules"/>
+<div class="wishlisttop">
+	<div style="height:30px;width:100%;background-color:#666">
+		<span style="line-height:30px;color:white;padding-left:30px;font-size:14px;font-weight:bold;">MY ACCOUNT</span>
+	</div>
+	<div style="margin:0 30px;">
+		<isbreadcrumbs bcurl1="${URLUtils.https('Account-Show')}" bctext1="My Account" bctext2="Wish List Search"/>
+	</div>
+</div>
+<div class="wishlistsearchresult">
+	<isslot id="wishlist-banner" description="Banner for Wish List Search Results" context="global" />
+	<h1>${Resource.msg('wishlist.searchheader','account',null)}</h1>
+	<p>${Resource.msg('wishlist.searchsubheader','account',null)}</p>
+	<isinclude template="account/wishlist/wishlistsearch"/>
+	<div class="wishlistresults">
+	<isif condition="${!empty(pdict.CurrentForms.wishlist.productlists)}">
+		<table class="wishlistresultstable" summary="Wish List Search Results">
+			<tr>
+				<th>Last Name</th>			
+				<th>First Name</th>
+				<th>Location</th>
+				<th><!-- empty --></th>
+			</tr>
+			<isloop items="${pdict.CurrentForms.wishlist.productlists}" var="ProductList" status="loopstate">
+				<tr <isif condition="${loopstate.isEven()}">class="even"<iselse>class="odd"</isif>>
+
+
+					<td class="lastname">
+						<isprint value="${ProductList.object.owner.profile.lastName}"/>
+					</td>
+					<td class="firstname">
+						<isprint value="${ProductList.object.owner.profile.firstName}"/>
+					</td>
+					<td class="city">
+						<isif condition="${ProductList.object.shippingAddress != null}">
+							<isprint value="${empty(ProductList.object.shippingAddress)?'':ProductList.object.shippingAddress.city + ", " + ProductList.object.shippingAddress.stateCode }"/>
+						<iselseif condition="${ProductList.object.owner.profile.addressBook.preferredAddress != null}">
+							<isprint value="${empty(ProductList.object.owner.profile.addressBook.preferredAddress)?'':ProductList.object.owner.profile.addressBook.preferredAddress.city + ", " + ProductList.object.owner.profile.addressBook.preferredAddress.stateCode }"/>
+						</isif>
+					</td>
+					<td class="view">
+						<a href="${URLUtils.url('Wishlist-ShowOther','WishListID',ProductList.object.ID)}">
+							<span>view</span>
+						</a>
+					</td>
+				</tr>
+			</isloop>
+		</table>
+	<iselse>
+		<div class="wishlistresultsempty">
+			<div class="wishlistemptymessage">
+				${Resource.msg('searchresult.emptymessage','account',null)}
+				<isif condition="${pdict.SearchLastName != null}"><span class="value"><isprint value="${pdict.SearchLastName}"></span></isif>
+				<isif condition="${pdict.SearchFirstName != null}"><span class="value"><isprint value="${pdict.SearchFirstName}"></span></isif>
+				<isif condition="${pdict.SearchEmail != null}"><span class="value"><isprint value="${pdict.SearchEmail}"></span></isif>
+				${Resource.msg('searchresult.emptymessage2','account',null)}
+			</div><!-- END: wishlistemptymessage -->
+		</div><!-- END: wishlistresultsempty -->
+	</isif>
+	</div><!-- END: wishlistresults -->
+</div><!-- END: wishlistsearchresult -->
+<script type="text/javascript"><!--
+
+function setDefaultValues() {
+	jQuery("[name=dwfrm_wishlist_search_firstname]").val("First Name");
+	jQuery("[name=dwfrm_wishlist_search_lastname]").val("Last Name");
+	jQuery("[name=dwfrm_wishlist_search_email]").val("Email");
+}
+
+function clearAllValues() {
+	jQuery("[name=dwfrm_wishlist_search_firstname]").val("");
+	jQuery("[name=dwfrm_wishlist_search_lastname]").val("");
+	jQuery("[name=dwfrm_wishlist_search_email]").val("");
+}
+
+function clearDefaults() {
+	if(jQuery("[name=dwfrm_wishlist_search_firstname]").val() == "First Name"){		
+		jQuery("[name=dwfrm_wishlist_search_firstname]").val("");
+	}
+	if(jQuery("[name=dwfrm_wishlist_search_lastname]").val() == "Last Name"){
+		jQuery("[name=dwfrm_wishlist_search_lastname]").val("");
+	}
+	if(jQuery("[name=dwfrm_wishlist_search_email]").val() == "Email"){
+		jQuery("[name=dwfrm_wishlist_search_email]").val("");
+	}
+}
+function shouldSetDefaults() {
+	return	(jQuery("[name=dwfrm_wishlist_search_firstname]").val() == "First Name" || jQuery("[name=dwfrm_wishlist_search_firstname]").val() == "") &&
+			(jQuery("[name=dwfrm_wishlist_search_lastname]").val() == "Last Name" || jQuery("[name=dwfrm_wishlist_search_lastname]").val() == "") &&
+			(jQuery("[name=dwfrm_wishlist_search_email]").val() == "Email" || jQuery("[name=dwfrm_wishlist_search_email]").val() == "");
+	
+}
+
+  	jQuery(document).ready(function() {
+  	  	
+  		setDefaultValues();
+
+		jQuery("[name=dwfrm_wishlist_search_firstname]").focus(function() {
+			clearDefaults();
+		});
+		jQuery("[name=dwfrm_wishlist_search_lastname]").focus(function() {
+			clearDefaults();
+		});
+		jQuery("[name=dwfrm_wishlist_search_email]").focus(function() {
+			clearDefaults();
+		});
+		jQuery("[name=dwfrm_wishlist_search_firstname]").blur(function() {
+			if(shouldSetDefaults()) {
+				setDefaultValues();
+			}
+		});	
+		jQuery("[name=dwfrm_wishlist_search_lastname]").blur(function() {
+			if(shouldSetDefaults()) {
+				setDefaultValues();
+			}
+		});	
+		jQuery("[name=dwfrm_wishlist_search_email]").blur(function() {
+			if(shouldSetDefaults()) {
+				setDefaultValues();
+			}
+		});		
+  	});
+  	  	
+
+
+--></script>
+</isdecorate>

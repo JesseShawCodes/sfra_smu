@@ -1,0 +1,55 @@
+<isdecorate template="account/wishlist/pt_wishlist">
+<isinclude template="util/modules"/>
+<div class="wishlisttop">
+	<div style="height:30px;width:100%;background-color:#666">
+		<span style="line-height:30px;color:white;padding-left:30px;font-size:14px;font-weight:bold;">MY ACCOUNT</span>
+	</div>
+	<div style="margin:0 30px;">
+		<isbreadcrumbs bcurl1="${URLUtils.https('Account-Show')}" bctext1="My Account" bctext2="Wish List"/>
+	</div>
+</div>
+<div class="wishlistlogin">
+	
+	<isinclude template="account/login/logininclude"/>
+	
+	<div class="logincreate">
+		<h3>${Resource.msg('landing.createheader','account',null)}</h3>
+		<div class="createaccount">
+			
+			<iscontentasset aid="create-wishlist-benefits"/>
+			
+			<form action="${URLUtils.httpsContinue()}" method="post" id="${pdict.CurrentForms.login.htmlName}_register">
+				<fieldset>
+					<legend class=clearText>Register Button</legend>
+					<div class="createaccountbutton">
+						<button class="imagebutton createaccount" type="submit" value="${Resource.msg('global.createbutton','locale',null)}" name="${pdict.CurrentForms.login.register.htmlName}"><span>${Resource.msg('global.createbutton','locale',null)}</span></button>
+					</div><!-- END: createaccountbutton -->
+					<input type="hidden" name="${pdict.CurrentForms.login.secureKeyHtmlName}" value="${pdict.CurrentForms.login.secureKeyValue}"/>
+				</fieldset>
+			</form>
+			<div class="createbenefits">
+				<iscomment>
+					<iscontentasset aid="create-account-benefits"/>
+				</iscomment>
+				<a href="$url(Page-Show,cid,security-policy)$">${Resource.msg('account.benefitslink','account',null)}</a>
+			</div>
+			
+				
+			
+			<div class="clear"><!-- FLOAT CLEAR --></div>
+		</div><!-- END: createaccount -->
+	</div><!-- END: logincreate -->
+
+	<div class="logingeneral">
+		<h3>${Resource.msg('wishlist.searchheader','account',null)}</h3>
+		<div class="wishlistsearch">
+			<p>${Resource.msg('landing.findmessage','account',null)}</p>
+
+			<isinclude template="account/wishlist/wishlistsearch"/>
+
+			<div class="clear"><!-- FLOAT CLEAR --></div>
+		</div><!-- END: wishlist_searchcontainer -->
+	</div><!-- END: wishlist_search -->
+	<div class="clear"><!-- FLOAT CLEAR --></div>
+</div><!-- END: wishlistlogin -->
+</isdecorate>

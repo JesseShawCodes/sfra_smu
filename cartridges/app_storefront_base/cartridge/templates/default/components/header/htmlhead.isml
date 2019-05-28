@@ -49,10 +49,10 @@
 
 <iscomment>the page title calculated by the app </iscomment>
 <isscript>
-	var titleLocation : String = pdict.CurrentPageMetaData.getTitle();
+	var titleLocation : String = pdict.CurrentPageMetaData.title;
 	var southMoon : String = "";
 	if(titleLocation.indexOf('Sites-') >= 0){
-		pdict.CurrentPageMetaData.setTitle("South Moon Under");
+		pdict.CurrentPageMetaData.setTitle(title : "South Moon Under");
 	} else if(titleLocation.indexOf('South Moon Under') == -1){
 		southMoon = " | South Moon Under";
 	}

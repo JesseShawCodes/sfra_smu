@@ -1,0 +1,144 @@
+<isdecorate template="account/pt_giftcard"/>
+<isinclude template="util/modules"/>
+<style>
+    .needhelp {display:none;}
+</style>
+<div class="accountoverview">
+    <script src='https://www.google.com/recaptcha/api.js'></script>
+    <div class="giftcardtileform">
+        <h1 class="giftcardh1">${Resource.msg('giftcard.title','checkout',null)}</h1>
+        <div class="giftcardinner">
+            <div class="giftcardbuy">
+                <a href="${URLUtils.url('Product-Show','pid','SMU-EGIFTCARD')}">${Resource.msg('giftcard.buyegift','checkout',null)}</a>
+                <a href="${URLUtils.url('Product-Show','pid','GC025B')}">${Resource.msg('giftcard.buygiftcard','checkout',null)}</a>
+            </div>
+
+            <div class="cardlinks">
+                <button class="gcbutton">${Resource.msg('giftcard.checkbalance','checkout',null)}</button>
+                <a class="term visually-hidden" href="javascript:void(0);">${Resource.msg('giftcard.terms','checkout',null)}</a>
+
+                <div class="giftcardcheck giftcardtile visually-hidden">
+                <div class="giftcardclosebtn gcbutton" style="background-position: left -1px; cursor: default;"></div>
+                    <div class="giftcardcheck">
+                        <div id="giftcertentry" class="giftcertform">
+                            <form method="post" id="${pdict.CurrentForms.giftcert.htmlName}" class="suppress">
+                                <div class="formfield giftcertfield">
+                                    <isinputfield
+                                        formfield="${pdict.CurrentForms.giftcert.balance.giftCertID}"
+                                        type="input" value="false" />
+                                    <isinputfield
+                                        formfield="${pdict.CurrentForms.giftcert.balance.giftCertID}"
+                                        type="input" label="false" />
+                                    <div class="clear"></div>
+                                    <br />
+                                    <isinputfield
+                                        formfield="${pdict.CurrentForms.giftcert.balance.giftCertPin}"
+                                        type="input" value="false" />
+                                    <isinputfield
+                                        formfield="${pdict.CurrentForms.giftcert.balance.giftCertPin}"
+                                        type="input" label="false" />
+                                    <div class="clear"></div>
+                                    
+                            <button class="imagebutton checkbalance g-recaptcha" data-sitekey="6LecbC8UAAAAAGkPBWeKS04SxgCrjjUXSGKEKuq_" data-callback="onSubmit"><span>${Resource.msg('global.checkbalance','locale',null)}</span></button>
+                                    <div class="clear"></div>
+                                    <div class="balance">
+                                        <!-- contains the balance information on a successful balance check -->
+                                    </div>
+                                    <div class="clear"></div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="giftcardtile giftcard-terms visually-hidden">
+                	<div class="giftcardclosebtn term" style="background-position: left -1px; cursor: default;"></div>
+                    <iscontentasset aid="giftCardTerms"/>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    <script>
+    jQuery('.term').click(function () {
+        $(".giftcard-terms").toggleClass('visually-hidden');
+    });
+    jQuery(".gcbutton").click(function() {
+        $(".giftcardcheck.giftcardtile").toggleClass('visually-hidden');
+    });
+    $(".giftcertfield .labeltext:first").html("Gift Card Number:");
+    function onSubmit() {
+		var gcId = jQuery("input[name=${pdict.CurrentForms.giftcert.balance.giftCertID.htmlName}]").val();
+		var gcPin = jQuery("input[name=${pdict.CurrentForms.giftcert.balance.giftCertPin.htmlName}]").val();
+		var gcCap = jQuery("textarea[name=g-recaptcha-response]").val();
+		checkGiftCertBalance(gcId, gcPin, gcCap);
+		return false;
+	}
+
+    function checkGiftCertBalance(giftCertificateId,giftCertificatePin,captchaVal) {
+        setGiftCertError(null);
+        setGiftCertBalanceInfo(null);
+        // nothing entered
+        if(!giftCertificateId || !giftCertificatePin) {
+            setGiftCertError("${Resource.msg('billing.giftcertidmissing','checkout',null)} and PIN");
+            grecaptcha.reset();
+            return;
+        }
+//      // load gift certificate details
+//      var url = app.util.appendParamToURL("${URLUtils.https('COBilling-GetGiftCertificateBalance')}", "giftCertificateID", giftCertificateId);
+//      url = app.util.appendParamToURL(url, "giftCertificatePin", giftCertificatePin);
+//      url = app.util.appendParamToURL(url, "Captcha", captchaVal);
+//      var result = app.ajax.getJson({
+//          url: url,
+//          callback: function(data) {
+//              grecaptcha.reset();
+//				if(data.giftCertificate){
+//        	    	if(data.giftCertificate.balance == "Captcha Failed") {
+//       	        	setGiftCertError("Captcha Failed");
+//					}
+//				}
+
+        var post = jQuery('#dwfrm_giftcert').serialize();
+        jQuery.ajax({
+            type: "POST",
+            url: "${URLUtils.https('GiftCard-GetBalance')}",
+            data: post,
+            dataType: 'json',
+            success: function(data){
+                if(data.success) {
+                    setGiftCertBalanceInfo(data.balance);
+                } else {
+                    setGiftCertError("${Resource.msg('billing.giftcertinvalid','checkout',null)}");
+                }
+            },
+            failure: function(data) {
+                setGiftCertError("${Resource.msg('billing.giftcertinvalid','checkout',null)}");
+                return false;
+            },
+            error : function(XMLHttpRequest, textStatus, errorThrown){
+                setGiftCertError("${Resource.msg('billing.giftcertinvalid','checkout',null)}");
+                console.log('error');
+                return false;
+            }
+        });
+    }
+
+    function setGiftCertError(msg) {
+        if(!msg) {
+            jQuery("${'#'}giftcertentry span.errormessage").remove();
+            return;
+        }
+        jQuery("input[name=${pdict.CurrentForms.giftcert.balance.giftCertID.htmlName}]").parent().append("<span class=\"errormessage\">" + msg + "<\/span>");
+    }
+
+    function setGiftCertBalanceInfo(amountExpr) {
+        if(!amountExpr) {
+            jQuery(".balance").empty();
+            return;
+        }
+        jQuery(".balance").text("${Resource.msg('billing.giftcertbalance','checkout',null)}" + amountExpr);
+    }
+    </script>
+    <div class="clear"></div>
+</div><!-- END: accountoverview -->
+<ismonetatetrackpage pagename="account" />
+</isdecorate>
