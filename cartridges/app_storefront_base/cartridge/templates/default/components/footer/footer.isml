@@ -1,0 +1,45 @@
+<iscomment>
+	This is the footer for all pages. Be careful caching it if it contains
+	user dependent information. Cache its elements instead if necessary (do not forget
+	to change the isinclude into a pipeline include for that).
+</iscomment>
+<div id="footer">
+	<isslot id=footer-top description="Footer for Entire Site" context="global" />
+	<div class="footer-bottom">
+		<iscontentasset aid="footer-bottom"/>
+	</div>
+	
+</div><!-- END: footer -->
+
+<iscomment> MONETATE JESSE SHAW
+<isinclude template="monetate/monetatefooter"/>
+<isinclude template="monetate/monetateuserinfo" />
+</iscomment>
+
+<isinclude template="components/footer/trackers"/>
+<isinclude template="account/login/loginpopup"/>
+
+<iscomment>
+	Customer registration can happen everywhere in the page flow. As special tag in the pdict
+	is indicating it. So we have to check on every page, if we have to report this event for
+	the reporting engine.
+</iscomment>
+<isinclude template="util/reporting/ReportUserRegistration.isml"/>
+
+<script type="text/javascript">
+/* <![CDATA[ */
+var google_conversion_id = 1003276489;
+var google_custom_params = window.google_tag_params;
+var google_remarketing_only = true;
+/* ]]> */
+</script>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js"></script>
+<noscript>
+<div style="display:inline;">
+<img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/1003276489/?value=0&amp;guid=ON&amp;script=0"/>
+</div>
+</noscript>
+
+<iscomment>Footer tags & data</iscomment>
+
+<isinclude template="components/footer/brontofooter"/>

@@ -1,0 +1,507 @@
+/**
+*	This script is intended to be the realized all function necessary to work with Monetate
+*/
+
+importPackage( dw.system );
+importPackage( dw.object );
+importPackage( dw.util );
+importPackage( dw.web );
+importPackage( dw.catalog );
+importPackage( dw.customer );
+importPackage( dw.net );
+importPackage( dw.io );
+importPackage( dw.crypto );
+importPackage( dw.order );
+
+/**
+*	Object that intended to be the realized all function necessary to work with Monetate
+*/
+var MonetateObject = function () {
+	return {
+		/**
+		*	Functions that get settings from SitePreferences
+		*/
+		getMonetateTag: function() {
+			return Site.getCurrent().getCustomPreferenceValue('monetateTag') || "";
+		},
+		getMonetateSFTPHost: function() {
+			return "50.19.101.199";
+		},
+		getMonetateSFTPUser: function() {
+			return Site.getCurrent().getCustomPreferenceValue('monetateSFTPUser') || "";
+		},
+		getMonetateSFTPPassword: function() {
+			return Site.getCurrent().getCustomPreferenceValue('monetateSFTPPassword') || "";
+		},
+		getMonetatePriceBookId: function() {
+			return Site.getCurrent().getCustomPreferenceValue('monetatePriceBookId') || "";
+		},
+		getMonetateSalePriceBookId: function() {
+			return Site.getCurrent().getCustomPreferenceValue('monetateSalePriceBookId') || "";
+		},
+		getMonetateUserInfo: function() {
+			return Site.getCurrent().getCustomPreferenceValue('monetateUserInfo') || [];
+		},
+		getMonetateVariationInSite: function() {
+	    	if ( Site.getCurrent().getCustomPreferenceValue('monetateVariationInSite') == "variant"){
+	   		     return true;
+	    	} else {
+	    		 return false;
+	    	}
+        },
+		/**
+		*	Function that get information about product
+		*	@param {Product} product Current product
+		*	@return {Array} productsArray Array with information about product
+		*/
+		getProductDetails: function(product : Product) {
+			var productsArray : Array = [];
+			
+			if(product.online && product.searchable) { 
+				if(product.isProductSet()) {
+					var productsIterator : Iterator = product.getProductSetProducts().iterator();
+					
+					while(!empty(productsIterator) && productsIterator.hasNext()) {
+						var productSetProduct : Product = productsIterator.next();
+						
+						//If product is master, online and have a variants then get this product
+						if(productSetProduct.master) {
+							var variants : Collection = productSetProduct.getVariants();
+							if(!empty(variants)) {
+								for each(var tmpProduct : Product in variants) {
+									if(tmpProduct.getOnlineFlag()) {
+										productSetProduct = tmpProduct;
+										break;
+									}
+								}
+							} 
+						}
+							
+						productsArray.push(this.lengthCheck(productSetProduct.getID()));
+					}
+				} else if(product.isOptionProduct()){
+					if(this.getMonetateVariationInSite() && product.isMaster()){
+						productsArray.push(this.lengthCheck(product.getVariationModel().getDefaultVariant().getID()));
+					} else {
+						productsArray.push(this.lengthCheck(product.getID()));
+					}
+				} else if(!this.getMonetateVariationInSite()){
+					productsArray.push(this.getProductID(product, false));
+				} else if(this.getMonetateVariationInSite() && product.isMaster()){
+					productsArray.push(this.lengthCheck(product.getVariationModel().getDefaultVariant().getID()));
+				} else {
+					productsArray.push(this.lengthCheck(product.getID()));
+				}
+			}
+			
+			return productsArray;
+		},
+		
+		/**
+		*	Function that get information about products in the cart
+		*	@param {Basket} basket Current basket
+		*	@return {Array} productsArray Array with information about products in the cart
+		*/		
+		getCartRows: function(basket : Basket) {
+			var productsInBusket : Iterator = basket.getProductLineItems().iterator(),
+				giftCertificatesInBasket : Iterator = basket.getGiftCertificateLineItems().iterator(),
+				productsArray : Array = [];
+				
+			while(!empty(productsInBusket) && productsInBusket.hasNext()) {
+				var product : ProductLineItem = productsInBusket.next(),
+					optionProduct : Iterator = product.getOptionProductLineItems().iterator(),
+					productId : String = product.getProductID(),
+					quantity : Number = product.getQuantityValue(),
+					unitPrice : Number = product.getAdjustedNetPrice().getValue().toFixed(2),
+					currency : String = product.getBasePrice().getCurrencyCode(),
+					sku : String = product.getManufacturerSKU();
+					
+					unitPrice = (unitPrice/quantity).toFixed(2);
+					
+				productsArray.push({
+					"productId": this.getProductID(product.getProduct(), true),
+					"quantity": quantity,
+					"unitPrice": unitPrice,
+					"currency": currency,
+					"sku": this.lengthCheck(sku),
+				});
+				
+				while(!empty(optionProduct) && optionProduct.hasNext()) {
+					var product : ProductLineItem = optionProduct.next(),
+						productId : String = product.getOptionID(),
+						quantity : Number = product.getQuantityValue(),
+						unitPrice : Number = product.getBasePrice().getValue().toFixed(2),
+						currency : String = product.getBasePrice().getCurrencyCode();
+						
+					if(product.getPrice().getValue() > 0) {
+						productsArray.push({
+							"productId": this.lengthCheck(productId),
+							"quantity": quantity,
+							"unitPrice": unitPrice,
+							"currency": currency
+						});	
+					}
+				}
+			}
+			
+			while(!empty(giftCertificatesInBasket) && giftCertificatesInBasket.hasNext()) {
+				var giftCertificate : GiftCertificateLineItem = giftCertificatesInBasket.next(),
+					unitPrice : Number = giftCertificate.getBasePrice().getValue().toFixed(2),
+					currency : String = giftCertificate.getBasePrice().getCurrencyCode();
+					
+				productsArray.push({
+					"productId": "gift-card",
+					"quantity": 1,
+					"unitPrice": unitPrice,
+					"currency": currency
+				});
+			}
+			
+			return productsArray;
+		},
+		
+		/**
+		*	Function that get information about order
+		*	@param {Order} order Current order
+		*	@return {Array} productsArray Array with information about order
+		*/	
+		getPurchaseRows: function(order : Order) {
+			var productsInOrder : Iterator = order.getProductLineItems().iterator(),
+				giftCertificatesInOrder : Iterator = order.getGiftCertificateLineItems().iterator(),
+				purchaseId : String = order.getCurrentOrderNo(),
+				productsArray : Array = [];
+			var purchaseRegex : RegExp = /[1-9][0-9]{1,7}\b/igm;
+			purchaseId = (purchaseId.match(purchaseRegex));
+			purchaseId = purchaseId[0];
+			
+			while(!empty(productsInOrder) && productsInOrder.hasNext()) {
+				var product : ProductLineItem = productsInOrder.next(),
+					optionProduct : Iterator = product.getOptionProductLineItems().iterator(),
+					productId : String = product.getProductID(),
+					quantity : Number = product.getQuantityValue(),
+					unitPrice : Number = product.getAdjustedNetPrice().getValue().toFixed(2),
+					currency : String = product.getBasePrice().getCurrencyCode(),
+					sku : String = product.getManufacturerSKU();
+					
+					unitPrice = (unitPrice/quantity).toFixed(2);
+				
+				productsArray.push({
+					"purchaseId": this.lengthCheck(purchaseId),
+					"productId":this.getProductID(product.getProduct(), false),
+					"quantity": quantity,
+					"unitPrice": unitPrice,
+					"currency": currency,
+					"sku": 	this.lengthCheck(sku)
+				});
+				
+				while(!empty(optionProduct) && optionProduct.hasNext()) {
+					var product : ProductLineItem = optionProduct.next(),
+						productId : String = product.getOptionID(),
+						quantity : Number = product.getQuantityValue(),
+						unitPrice : Number = product.getBasePrice().getValue().toFixed(2),
+						currency : String = product.getBasePrice().getCurrencyCode();
+						
+					if(product.getPrice().getValue() > 0) {
+						productsArray.push({
+							"purchaseId": this.lengthCheck(purchaseId),
+							"productId": this.lengthCheck(productId),
+							"quantity": quantity,
+							"unitPrice": unitPrice,
+							"currency": currency
+						});	
+					}
+				}
+			}
+			
+			while(!empty(giftCertificatesInOrder) && giftCertificatesInOrder.hasNext()) {
+				var giftCertificate : GiftCertificateLineItem = giftCertificatesInOrder.next(),
+					unitPrice : Number = giftCertificate.getBasePrice().getValue().toFixed(2),
+					currency : String = giftCertificate.getBasePrice().getCurrencyCode();
+					
+				productsArray.push({
+					"purchaseId": this.lengthCheck(purchaseId),
+					"productId": "gift-card",
+					"quantity": 1,
+					"unitPrice": unitPrice,
+					"currency": currency
+				});
+			}
+			
+			return productsArray;
+		},
+		
+		/**
+		*	Function that get product set prices
+		*	@param {Collection} productSetProducts Collections with products
+		*	@return {Object} priceObject Object with product set prices
+		*/
+		getProductSetPrice: function(productSetProducts : Collection) {
+			var productsIterator : Iterator = productSetProducts.iterator(),
+				priceObject : Object = {},
+				altPrice : Number = 0,
+				price : Number = 0;
+			
+			while(!empty(productsIterator) && productsIterator.hasNext()) {
+				var product : Product = productsIterator.next();
+				
+				if(product.isOnline() && product.isSearchable()) {
+					altPrice += (!empty(product.getVariationModel().getVariants()) && product.isMaster()) ? product.getVariationModel().getDefaultVariant().getPriceModel().getPriceBookPrice(this.getMonetatePriceBookId()).getValue() : product.getPriceModel().getPriceBookPrice(this.getMonetatePriceBookId()).getValue();
+					price += (!empty(product.getVariationModel().getVariants()) && product.isMaster()) ? product.getVariationModel().getDefaultVariant().getPriceModel().getPriceBookPrice(this.getMonetateSalePriceBookId()).getValue() : product.getPriceModel().getPriceBookPrice(this.getMonetateSalePriceBookId()).getValue();
+				}
+			}
+			
+			priceObject.price = price;
+			priceObject.altPrice = altPrice;
+			
+			return priceObject;
+		},
+		
+		/**
+		*	Function that get bread crumb from PDP
+		*	@param {Collection} product Current product
+		*	@return {Array} breadCrumbsArray Object with bread crumb from PDP
+		*/
+		getPDPBreadCrumbs: function(product : Product) {
+			var breadCrumbsArray : Array = [],
+				currentProduct : Product = (product.isVariant()) ? product.getVariationModel().getMaster() : product,
+				category : Category = currentProduct.getPrimaryCategory();
+			
+			breadCrumbsArray.unshift(currentProduct.getName());
+			
+			if(!empty(category) && category.isOnline()) {
+				while(!empty(category.getParent())) {
+					if(category.isOnline()) breadCrumbsArray.unshift(category.getDisplayName());
+					category = category.getParent();
+				}
+			}
+			
+			breadCrumbsArray.unshift(Resource.msg('global.home', 'locale', null));
+			
+			return breadCrumbsArray;
+		},
+		
+		/**
+		*	Function that get bread crumb from CLP and Search page
+		*	@param {Collection} productSearchResult Product Search Resalt
+		*	@param {Array} breadCrumbsArray Object with bread crumb from CLP and Search page
+		*/
+		getCLPBreadCrumbs: function(productSearchResult : ProductSearchModel) {
+			var breadCrumbsArray : Array = [],
+				category : Category = productSearchResult.getCategory();
+			
+			if(!empty(productSearchResult)) {
+				if(!empty(productSearchResult.getSearchPhrase())) {
+					breadCrumbsArray.unshift(productSearchResult.getSearchPhrase());
+				} else {
+					if(!empty(category) && category.isOnline()) {
+						while(!empty(category.getParent())) {
+							if(category.isOnline()) breadCrumbsArray.unshift(category.getDisplayName());
+							category = category.getParent();
+						}
+					}	
+				}
+			}
+			
+			breadCrumbsArray.unshift(Resource.msg('global.home', 'locale', null));
+			
+			return breadCrumbsArray;
+		},
+		
+		/**
+		*	Function that write XML element to file in ExportProductFeed job
+		*	@param {XMLStreamWriter} xsw XML Stream Writer
+		*	@param {String} nodeName Name for XML element
+		*	@param {String} nodeValue Value for XML element
+		*/
+		writeXMLElement: function(xsw : XMLStreamWriter, nodeName : String, nodeValue : String) {
+			xsw.writeStartElement(nodeName);
+				xsw.writeCharacters(nodeValue);
+			xsw.writeEndElement();
+		},
+		
+		/**
+		*	Function that send files to SFTP
+		*
+		*	@param {File} file File which we need to send to SFTP
+		*/
+		sendToSFTP : function (file : File) {
+			var req : SFTPClient = new SFTPClient(),
+		    	sftpHost : String = this.getMonetateSFTPHost(),
+		    	sftpUser : String = this.getMonetateSFTPUser(),
+		    	sftpPassword : String = this.getMonetateSFTPPassword();
+		    	
+		    try {
+				if (req.connect(sftpHost, sftpUser, sftpPassword)) {
+					req.cd("upload");
+					if( !req.putBinary(file.name, file) ) {
+						Logger.error("Monetate - ExportProductFeed.ds: Error - Could not upload file to " + sftpHost);
+						return false;
+					}
+					req.disconnect();
+					return true;
+				} else {
+					Logger.error("Monetate - ExportProductFeed.ds: Error - Could not connect to "+ sftpHost);
+					return false;
+				}
+		    } catch(e) {
+		      Logger.error("Monetate - ExportProductFeed.ds: Error - Error uploading file: {0}", e.message);
+		      return false;
+		    }
+		}, 
+		
+		/**
+		*	Function describes user profile
+		*
+		*	@param {File} file File which we need to send to SFTP
+		*/
+		getUserInfo : function (profile : Profile) : Object {
+			var meta : ObjectTypeDefinition = profile.describe(),
+				attributes : Array = this.getMonetateUserInfo(),
+				info : Object = {};
+				
+			if(!empty(attributes)){
+				for(let i = 0,lenght = attributes.length; i < lenght; i++){
+					var attribute : String = StringUtils.trim(attributes[i]).split("|");
+					if (!empty(attribute)){
+						var value : String = "";
+						switch (attribute.length){
+							case 1:
+								attribute[0] = StringUtils.trim(attribute[0]);
+								value = this.getUserInfoValue(meta, profile, attribute[0]);
+								info[attribute[0]] = value;
+								break;
+							case 2:
+								attribute[0] = StringUtils.trim(attribute[0]);
+								attribute[1] = StringUtils.trim(attribute[1]);
+								value = this.getUserInfoValue(meta, profile, attribute[0]);
+								info[attribute[1]] = value;
+								break;
+						}
+					}
+				}
+			}
+			return info;
+		}, 
+		getUserInfoValue : function (meta : ObjectTypeDefinition, object : Profile, propertyName : String) : String {
+			var attribute : ObjectAttributeDefinition = meta.getSystemAttributeDefinition(propertyName) || meta.getCustomAttributeDefinition(propertyName),
+				value : String = "";
+				
+			if (!empty(attribute)){
+				switch (attribute.valueTypeCode) {
+				case ObjectAttributeDefinition.VALUE_TYPE_DATE:
+					value = this.getUserInfoAttrValue(attribute, object, propertyName);
+					if(!empty(value)){
+						value = StringUtils.formatCalendar(new Calendar(value), "yyyy-MM-dd");
+					} else {
+						value = "";
+					}
+					
+					break;
+				case ObjectAttributeDefinition.VALUE_TYPE_DATETIME:
+					value = this.getUserInfoAttrValue(attribute, object, propertyName);
+					if(!empty(value)){
+						value = StringUtils.formatCalendar(new Calendar(value), "yyyy-MM-dd");
+					} else {
+						value = "";
+					}
+					break;
+				case ObjectAttributeDefinition.VALUE_TYPE_BOOLEAN:
+					break;
+				case ObjectAttributeDefinition.VALUE_TYPE_ENUM_OF_STRING:
+					value = this.getUserInfoAttrValue(attribute, object, propertyName).getValue();
+					if(empty(value)){ 
+						value = "";
+					}
+					break;
+				case ObjectAttributeDefinition.VALUE_TYPE_ENUM_OF_INT:
+					value = this.getUserInfoAttrValue(attribute, object, propertyName).getValue();
+					if(empty(value)){ 
+						value = "";
+					}
+					break;
+				case ObjectAttributeDefinition.VALUE_TYPE_SET_OF_STRING:
+					value = this.getUserInfoAttrValue(attribute, object, propertyName).join(" ");
+					if(empty(value)){ 
+						value = "";
+					}
+					break;
+				case ObjectAttributeDefinition.VALUE_TYPE_SET_OF_NUMBER:
+					value = this.getUserInfoAttrValue(attribute, object, propertyName).join(" ");
+					if(empty(value)){ 
+						value = "";
+					}
+					break;
+				case ObjectAttributeDefinition.VALUE_TYPE_SET_OF_INT:
+					value = this.getUserInfoAttrValue(attribute, object, propertyName).join(" ");
+					if(empty(value)){ 
+						value = "";
+					}
+					break;
+				case ObjectAttributeDefinition.VALUE_TYPE_PASSWORD:
+					break;
+				default:
+					value = this.getUserInfoAttrValue(attribute, object, propertyName);
+					if(empty(value)){ 
+						value = "";
+					}
+				}
+			}
+			return value;
+		},
+		
+		/**
+		*	Get value of single attributes
+		*	@param {ObjectAttributeDefinition} attribute
+		*	@param {Object} object
+		*	@param {String} propertyName
+		*	return {Object} value of attribute
+		*/
+		getUserInfoAttrValue : function (attribute : ObjectAttributeDefinition, object : Object, propertyName : String) : Object {
+			if (attribute.system) {
+				return object[propertyName];
+			} else if (!attribute.system) {
+				return object.custom[propertyName];
+			} else {
+				return null
+			}
+		}, 
+		
+		/**
+		*	Get correct product ID
+		*	@param {Product} product
+		*	return {String} value of attribute
+		*/
+		getProductID : function (product : Product, rule : Boolean) : String {
+			var id : String = "",
+				siteRule : Boolean = this.getMonetateVariationInSite();
+				
+			if(siteRule){			
+				if(product.isVariant() && rule){
+					id = product.getID();
+				} else if(product.isProduct() && !product.isVariant() && !product.isMaster()){
+					id = product.getID();
+				} else if (product.isMaster()){
+					id = product.getVariationModel().getDefaultVariant().getID();
+				} else {
+					id = product.getID();
+				} 		  
+			} else if(!siteRule) {
+				if (product.isMaster()){
+					id = product.getID();
+				} else if(product.isVariant()){
+					id = product.getVariationModel().getMaster().getID();
+				} else if(product.isProduct()){
+					id = product.getID();
+				} else if(product.isBundle() || product.isProductSet()) {
+					id = product.getID();
+				} 
+			}
+			
+			return this.lengthCheck(id);
+		},
+		
+		lengthCheck : function (input : String) : String {
+			if (!empty(input)) return input.length > 32 ? input.substr(0, 31) : input;
+		}
+	}
+};

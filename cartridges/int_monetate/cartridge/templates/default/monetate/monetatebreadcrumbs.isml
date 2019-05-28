@@ -1,0 +1,19 @@
+<isscript>
+	/*
+	*	Getting breadcrumbs for the all pages except clp, plp, pdp, search pages
+	*/
+	var breadCrumbsArray : Array = [];
+	
+	breadCrumbsArray.push(Resource.msg('global.home','locale',null));
+	
+	if(!empty(pdict.bctext1)) breadCrumbsArray.push(pdict.bctext1);
+	if(!empty(pdict.bctext2)) breadCrumbsArray.push(pdict.bctext2);
+	if(!empty(pdict.bctext3)) breadCrumbsArray.push(pdict.bctext3);
+</isscript>
+
+<script type="text/javascript">
+	/*
+	*	Writing breadcrumbs to the temporary storage
+	*/
+	monetateData.breadCrumbs = <isprint value="${JSON.stringify(breadCrumbsArray)}" encoding="off" />;
+</script>

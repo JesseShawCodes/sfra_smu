@@ -1,0 +1,4 @@
+#header {height:102px;width:960px;position:absolute;top:0;margin:0 15px;}
+.homepage-background-image{ text-align:center; }
+.homepage-background-image img{ image-rendering: optimizequality; max-width:100%; }
+.homepage{text-align: center;}

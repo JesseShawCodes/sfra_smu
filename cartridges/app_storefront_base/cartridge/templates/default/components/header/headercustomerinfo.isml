@@ -1,0 +1,25 @@
+<iscomment>
+     First condition in .headercustomerinfo div is what is displayed if user is logged into account.
+     Second Condition is what is diplayed if user is not logged in.
+</iscomment>
+
+<div class="headercustomerinfo">
+    <isif condition="${pdict.CurrentCustomer.registered}">
+          <style>
+               div.logo a {
+                    right: 7%;
+               }
+          </style>
+        <a href="${URLUtils.https('Account-Show')}" title="View ${Resource.msg('global.accountlink','locale',null)} - ${pdict.CurrentCustomer.profile.firstName} ${pdict.CurrentCustomer.profile.lastName}" class="username"><span class="username"><isprint value="${pdict.CurrentCustomer.profile.firstName}"/>&nbsp;<isprint value="${pdict.CurrentCustomer.profile.lastName}"/></span></a>
+         <isif condition="${!pdict.CurrentCustomer.authenticated}">
+            <span class="unauthenticated">(<a title="${Resource.msg('global.login','locale',null)}${pdict.CurrentCustomer.profile.firstName} ${pdict.CurrentCustomer.profile.lastName}" href="${URLUtils.https('Account-Show')}" class="userlogin">${Resource.msg('headercustomerinfo.pleaselogin','components',null)}</a>)</span>
+        </isif>
+        <span class="divider">|</span>
+        <a title="Click to logout" href="${URLUtils.url('Login-Logout')}" class="usernot">Logout</a>
+        <span class="divider">|</span>
+        <a title="Locate a Store Near You" href="https://www.southmoonunder.com/store-locator" class="storeLoc">Stores</a>
+    <iselse>
+        <span class="divider">|</span>
+        <a title="Locate a Store Near You" href="https://www.southmoonunder.com/store-locator" class="storeLoc">Stores</a>
+    </isif>
+</div><!-- END: headercustomerinfo -->

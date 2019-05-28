@@ -1,0 +1,324 @@
+/***********************************************/
+/* PAGE STRUCTURE CSS                          */
+/***********************************************/
+#container {
+	background-color: #fff;
+    margin: 0 auto;
+    background-repeat: no-repeat;
+    border: 0;
+}
+#container_black { margin: 0px auto;}
+
+#page { margin: 0px auto; width: 100%; }
+#main_white {margin:auto;background-color:rgba(255,255,255,.4);width: 100%;}
+
+/***********************************************/
+/* PAGE ELEMENT STYLING CSS                    */
+/***********************************************/
+
+td.detailscolumn .price {font-size:1.0em;font-style:normal;}
+
+/***** jQuery Dialog Skinning *****/
+.ui-dialog .ui-dialog-content {
+    overflow: visible;
+}
+.ui-widget.quickview .productdetailtop {
+    padding: 20px 0 0 18px;
+    width: 470px;
+}
+.ui-widget.quickview .productdetailtop h1 {
+    color: black;
+    font-size: 1em;
+    font-weight: bold;
+    padding: 0;
+}
+.ui-widget.quickview .productdetail {
+    margin: 0;
+    padding: 0;
+}
+.ui-widget.quickview .productdetail .itemNo {
+    color: black;
+    padding: 0;
+}
+.ui-widget.quickview .productdetail .price {
+    font-size: 1em;
+    font-weight: bold;
+    margin: 3px 0 10px 0;
+}
+.ui-widget.quickview .productdetail .availability {
+    font-size: 1em;
+    margin: 0;
+}
+.ui-widget.quickview .productdetail .label {
+    color: black;
+    line-height: 22px;
+}
+.ui-widget.quickview .productdetail .productinfo {
+    width: 275px;
+    margin: 10px 0 5px;
+}
+
+.ui-widget.quickview .productdetail .productimages {
+    width: 163px;
+}
+.ui-widget.quickview .productdetail .productdetailcolumn .variationattributes {
+    font-size: 0.9em;
+    font-weight: bold;
+    margin: 0;
+}
+.ui-widget.quickview .productdetail .productdetailcolumn .variationattributes .swatches {
+	margin: 0 0 8px;
+}
+.ui-widget.quickview .productdetail .productdetailcolumn .variationattributes .swatches li a{
+	font-size: 1em;
+}
+.ui-widget.quickview .productdetail .quickaddtocart {
+	float:right;
+	margin-top: 20px;
+}
+.ui-widget.quickview .productdetail .productimage {
+    height: 245px;
+    width: 163px;
+}
+.ui-widget.quickview .productdetail .productdetailbottom {
+    clear: both;
+    width: 173px;
+}
+.ui-widget.quickview .productdetail .productactions {
+    float: right;
+    margin-right: 5px;
+    text-align: right;
+    text-transform: lowercase;
+    font-weight: normal;
+}
+.ui-widget.quickview .productdetail .productactions a {
+    text-decoration: underline;
+    font-weight: normal;
+}
+.ui-widget.quickview .productdetail .socialmedia {
+    margin: 0;
+}
+.ui-widget.quickview .productdetail .productreview {
+    width: 30px;
+    margin: 0;
+}
+.ui-dialog .ui-dialog-title {
+	font-size: 1.05em;
+	color: #666666;
+	font-weight: normal;
+}
+.ui-dialog .ui-dialog-titlebar {
+	background: none repeat scroll 0 0 #E5E5E5;
+	padding: 3px 0 6px 5px;
+}
+.ui-dialog .ui-dialog-titlebar-close {
+	right: 5px;
+    top: 7px;
+}
+.ui-dialog-titlebar-close .ui-icon {
+	background: url("../images/close-icon.png") no-repeat scroll left -1px transparent;
+	height: 22px;
+    width: 22px;
+}
+.ui-state-hover .ui-icon {
+	background: url("../images/close-icon.png") no-repeat scroll left -25px transparent;
+}
+
+.ui-dialog-titlebar {
+	display: none;
+}
+
+.ui-dialog .ui-dialog-content {
+	padding: 0;
+}
+.ui-widget-content a {
+    color: black;
+    font-weight: bold;
+}
+.writereview .ui-dialog-titlebar {
+	display: block;
+	border-radius: 0;
+}
+.storepopup {
+	border: 7px solid #E5E5E5;
+}
+.storepopup .ui-dialog-titlebar {
+	display: block;
+	border-radius: 0;
+	
+}
+
+.quickview .productdetail .addtocartbar {
+    background: none repeat scroll 0 0 #CCCCCC;
+    border: medium none;
+    height: 32px;
+    margin-bottom: 15px;
+    margin-top: 15px;
+    padding: 0 5px;
+}
+.quickview .productdetail .addtocartbar .addtocart {
+    /*position: static;*/
+    padding: 0;
+}
+.quickview .productdetail .addtocartbar .addtocart .quanity {
+    display: inline;
+    margin: 1px 19px 2px 0;
+}
+.quickview .productdetail .addtocartbar .addtocart .quanity .label {
+    color: black;
+    font-size: 1em;
+    line-height: 27px;
+    padding: 0 0 0 5px;
+    text-transform: uppercase;
+}
+.quickview .productdetail .addtocartbar .addtocart .quanity input {
+    border: 1px solid #A8A8A8;
+    font-size: 1em;
+    height: 14px;
+    margin-bottom: 4px;
+    padding: 1px;
+    width: 14px;
+}
+
+/* HEADER/FOOTER COMPONENTS (Logo, Search, User Info, Mini Cart, Links, Category Menu)
+--------------------------------------------------------------------------------------- */
+
+/***** Header Logo *****/
+.sitesearch label {display: none;}
+.sitesearch form.simplesearch input.simplesearchinput {
+    border: 0 none;
+    padding: 3px;
+    font-size: 2em;
+}
+.sitesearch form.simplesearch input.simplesearchinput:focus {background:none;}
+.sitesearch button span {background:transparent none;visibility: hidden;}
+
+.sitesearch{
+	float: right;
+}
+
+/* Make site search beautiful */
+.sitesearch > form > fieldset > input.simplesearchinput{
+	float: right;
+	height: 32px;
+	top: 0;
+}
+
+/***** User Information (Welcome Message, Login, Register, etc.) *****/
+.headercustomerinfo {
+    letter-spacing: -0.025em;}
+.headercustomerinfo a {text-decoration:none;}
+
+/* SEARCH RESULTS
+--------------------------------------------------------------------------------------- */
+/* These styles create the default look for Product display with search results, cross sells and other places where multiple products are displayed. */
+.producttile .image .quickviewbutton { position: relative; z-index: 4; }
+.producttile .image .quickviewbutton a {background-image: url(../images/quickview.gif);}
+.producttile .image .quickviewbuttonNoHover a {background-image: url(../images/quickview_black.png); height: 20px; width: 81px; left: 0; opacity: .52; filter: alpha(opacity=52);}
+.producttile .image .quickviewbuttonNoHover:hover a { opacity: .80; filter: alpha(opacity=80); }
+
+/* PRODUCT DETAIL PAGE
+--------------------------------------------------------------------------------------- */
+
+.productdetail .price .standardprice {
+	color: #000;
+    text-decoration: none;
+    padding-right: 4px;
+}
+.productdetail .price .percentoff {
+	color: #888888;
+    float: left;
+}
+.productdetail .price .salespricered {
+	color: #B50000;
+    text-decoration: none;
+    display: inline;
+    padding-right: 4px;
+}
+.productdetail .price .standardpricered {
+	margin-right:5px;
+	clear: both;
+	color: #888;
+	text-decoration: none;
+	float: left;
+}
+.productdetail .price .salesprice {
+	margin-right: 10px;
+	color: #B50000;
+	float: left;
+}
+.pricing-container .promotion.promo-align {
+	margin-top: 7px;
+}
+
+.producttop .productPromotion {
+	max-width: 990px;
+}
+#free_ship_small {
+	float: right;
+	margin-top: 2px;
+}
+
+/* ERROR MESSAGES
+--------------------------------------------------------------------------------------- */
+/***** Cookies / Javascript disabled *****/	
+.disabledcontainer {background: transparent url(../images/background_header_disabled_message.gif) repeat-x top left;}
+.disabledmessage {background: transparent url(../images/background_header_disabled_message_bigicon.gif) no-repeat top left;}
+
+/* PRODUCT ZOOM IN/BOX
+--------------------------------------------------------------------------------------- */
+.zoomlink {
+/*	background:url(../images/zoom.png) no-repeat transparent;
+	display: none;
+    height: 100px;
+    left: 289px;
+    margin-top: -77px;
+    position: absolute;
+    width: 80px;
+    z-index: 999;*/
+    text-align:right;
+    padding:10px 0;
+}
+.zoomlink:visited, .zoomlink:focus {
+	outline: 0;
+	border: 0;
+}
+#cboxLoadedContent .productimage {
+	float: left;
+}
+#cboxLoadedContent .productthumbnails {
+	float: left;
+    width: 128px;
+}
+#cboxLoadedContent .productthumbnails img {
+    border: 1px solid #8F979D;
+    margin-bottom: 7px;
+    width: 115px;
+    height: 141px;
+}
+#anypos {
+    height: 200px;
+    overflow: visible;
+    z-index: 9999;
+}
+.pdzoom {
+	padding: 10px;
+}
+.pdzoom .productimages{
+	padding: 0 20px;
+}
+.pdzoom .navleft{
+	background-image: url("../images/nav-left.gif");
+    position: absolute;
+    height: 32px;
+    top: 300px;
+    width: 12px;
+}
+.pdzoom .navright{
+	background-image: url("../images/nav-right.gif");
+	position: absolute;
+    height: 32px;
+    top: 300px;
+    right: 20px;
+    width: 12px;
+}

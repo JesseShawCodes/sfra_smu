@@ -1,0 +1,154 @@
+<isdecorate template="account/pt_account"/>
+<isinclude template="util/modules"/>
+<style>
+.needhelp {display:none;}
+.testPage {margin: 30px 0 20px;}
+.testPage li {display:inline-block;}
+.testPage .outer {overflow-y: hidden;overflow-x: scroll;}
+.testPage .inner {width: max-content;}
+.testPage .swimage {float: left;}
+.testPage .swimage img {display: block;}
+
+div.slideUp {
+    height: 0;
+    overflow: hidden;
+    position: fixed;
+    bottom: 0;
+    transition: height 0.5s ease-in;
+}
+div.slideUp.open {
+    height: 380px;
+}
+
+.producttile .image .quickviewbuttonNoHover a {
+    background-image: none;
+    height: 362px;
+    width: 100%;
+    bottom: 0;
+}
+.producttile .producttileDetails > div {display:none}
+.producttile .producttileDetails > div.name {display:block}
+</style>
+
+<isset name="SKU" value="${19278403780005}" scope="page"/>
+<isif condition="${(request.httpQueryString)&&(request.httpQueryString.indexOf('SKU') != -1)}">
+	<isset name="SKU" value="${pdict.CurrentHttpParameterMap.SKU}" scope="page"/>
+</isif>
+<isscript>
+importPackage( dw.catalog );
+importPackage( dw.campaign );
+importPackage(dw.object);
+importPackage(dw.system);
+importPackage(dw.util);
+
+	var saleItem : dw.catalog.Product = dw.catalog.ProductMgr.getProduct(SKU);
+	var activePromos : dw.campaign.PromotionPlan = dw.campaign.PromotionMgr.activePromotions;
+	var priceModel     = saleItem.getPriceModel();
+	var salesPrice     = priceModel.getPrice();
+	var promoPrice     = dw.value.Money.NOT_AVAILABLE;
+	var tempPromoPrice = dw.value.Money.NOT_AVAILABLE;
+	var promos         = activePromos.getProductPromotions(item);
+	
+	if( !(empty(promos)) )
+	{
+		//loop through all promotions
+		for each(var promo : Promotion in promos) 
+		{
+	        var promoClass = promo.getPromotionClass();
+			if( promoClass && promoClass.equals(Promotion.PROMOTION_CLASS_PRODUCT) && !promo.isBasedOnCoupons() && !promo.isBasedOnSourceCodes() && IsAllowableCustomerGroup(promo) )
+			{
+				if( item.optionProduct )
+				{
+					tempPromoPrice = promo.getPromotionalPrice( item, item.getOptionModel() );
+				}
+				else
+				{
+					tempPromoPrice = promo.getPromotionalPrice( item );
+				}
+			}
+			
+			if( tempPromoPrice.available && !promoPrice.available )
+			{
+				promoPrice = tempPromoPrice;
+			}
+			else if( tempPromoPrice.available && promoPrice.available )
+			{
+				if( promoPrice > tempPromoPrice )
+				{
+					promoPrice = tempPromoPrice;
+				}
+			}
+		}
+	}
+</isscript>
+<div class="testPage">
+Base ${saleItem.priceModel.getPriceBookPrice(dw.system.Site.current.preferences.custom.listPriceDefault).toNumberString()}<br>
+Sale ${salesPrice.toNumberString()}<br>
+Promo ${promoPrice.toNumberString()}<br>
+<isscript>
+	if( promoPrice.available)
+	{
+		if(!empty(salesPrice.toNumberString()) && salesPrice.toNumberString() != 'N/A'){
+			if(salesPrice > promoPrice){
+				salesPrice = promoPrice;
+			}
+		}else{
+			salesPrice = promoPrice;
+		}
+	}
+</isscript>
+Final ${salesPrice.toNumberString()}<br>
+
+</div>
+
+<iscomment>
+<a class='QVlink' href="${URLUtils.url('Product-Show','pid', '18901304210008')}">test product</a>
+</br>
+
+<isscript>
+importPackage(dw.object);
+importPackage(dw.system);
+importPackage(dw.util);
+
+var catTops : dw.catalog.Category = dw.catalog.CatalogMgr.getCategory("bikini-tops");
+var catBots : dw.catalog.Category = dw.catalog.CatalogMgr.getCategory("bikini-bottoms");
+</isscript>
+
+<div class="tops outer">
+	<div class="inner">
+	<isloop items="${catTops.getOnlineProducts()}" var="LoopProductHit" status="loopstate" end="10">
+	<div class="swimage">
+	<isset name="prodVariant" value="${LoopProductHit.getVariationModel().getDefaultVariant()}" scope="page"/>
+	<img src="${prodVariant.getImage('small').url}" /> 
+<isset name="SelectedColorValue" value="${prodVariant.variationModel.getProductVariationAttribute('color')}" scope="page"/>
+${prodVariant.variationModel.getSelectedValue(SelectedColorValue).displayValue}
+	</div>
+	</isloop>
+	</div>
+</div>
+
+<div class="bottoms outer">
+	<div class="inner">
+	<isloop items="${catBots.getOnlineProducts()}" var="LoopProductHit" status="loopstate" end="10">
+	<div class="swimage">
+	<isset name="prodVariant" value="${LoopProductHit.getVariationModel().getDefaultVariant()}" scope="page"/>
+	<img src="${prodVariant.getImage('small').url}" />  
+	</div>
+	</isloop>
+	</div>
+</div>
+</iscomment>
+
+<script>
+jQuery('.QVlink').click(function(e) {
+	app.quickView.show({url: this.href, source: "quickview"});
+	setTimeout(function(){
+		$(".quickview .productimage a").focus();
+	},1000);
+	return false;
+});
+</script>
+
+	<div class="clear"></div>
+</div><!--end testPage-->
+</isdecorate>

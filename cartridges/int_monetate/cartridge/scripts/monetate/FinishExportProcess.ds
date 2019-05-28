@@ -1,0 +1,52 @@
+/**
+*	Script that finishing writing to the XML file and closes all opened iterators
+*
+* 	@input XSW : dw.io.XMLStreamWriter
+* 	@input FileWriter : dw.io.FileWriter
+* 	@input ExportFile : dw.io.File
+* 	@input GZipFile : dw.io.File
+*/
+
+importPackage( dw.system );
+importPackage( dw.util );
+importPackage( dw.catalog );
+importPackage( dw.io );
+importPackage( dw.web );
+importPackage( dw.content );
+
+importScript('int_monetate:monetate/libMonetate.ds');
+
+/**
+*	Function that finishing writing to the XML file and closes all opened iterators
+*
+*	@param {PipelineDictionary} args Pipeline dictionary
+*/
+function execute( args : PipelineDictionary ) : Number {
+	var monetateObject : Object = new MonetateObject(),
+		xsw : XMLStreamWriter = args.XSW,
+		fileWriter : FileWriter = args.FileWriter,
+		exportFile : File = args.ExportFile,
+		gzipFile : File = args.GZipFile;
+	
+	/*
+	*	Write end element node </catalog> and finish write to XML document
+	*/
+	xsw.writeEndElement();
+	xsw.writeEndDocument();
+	
+	/*
+	*	Close XMLStreamWriter and FileWriter
+	*/
+	xsw.close();
+	fileWriter.close();
+	
+	/**
+	*	Create gzip file and send to Monetate SFTP
+	*/
+	exportFile.gzip(gzipFile);
+	if(monetateObject.sendToSFTP(gzipFile)){
+		return PIPELET_NEXT;
+	}else{
+		return PIPELET_ERROR;
+	}
+}

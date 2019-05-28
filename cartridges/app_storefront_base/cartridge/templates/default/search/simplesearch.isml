@@ -1,0 +1,22 @@
+<script type="text/javascript"><!--
+var searchSuggestURL = "${URLUtils.url('Search-GetSuggestions')}";
+
+jQuery(document).ready(function() {
+	app.searchsuggest.init("SimpleSearchForm", "searchinput", "${Resource.msg('simplesearch.searchtext','search',null)}", "suggestions", searchSuggestURL);		
+});
+jQuery(window).resize(function (){
+	app.searchsuggest.repositionResultsDiv();
+});
+
+//--></script>
+
+<div class="sitesearch">
+     <form action="${URLUtils.https('Search-Show')}" method="get" id="SimpleSearchForm" class="simplesearch">
+          <fieldset>
+               <legend class=clearText>Search</legend>
+               <label for="searchinput">${Resource.msg('simplesearch.searchlabel','search',null)}</label>
+               <input type="text" name="q" placeholder="Search" class="simplesearchinput" id="searchinput" aria-label="Search Term" />
+               <button type="submit" value="${Resource.msg('global.go','locale',null)}" name="simplesearch" aria-label="Execute Search"><span>${Resource.msg('global.go','locale',null)}</span></button>
+          </fieldset>
+     </form>
+</div><!-- END: sitesearch -->

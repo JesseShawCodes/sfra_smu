@@ -1,0 +1,79 @@
+<iscontent type="text/html" charset="UTF-8" compact="true">
+
+<isscript>
+	var cachebust : Number = Math.floor(Math.random()*10000000);
+</isscript>
+
+<isif condition="${pdict.trackOrder}">
+
+	<isscript>
+	orderno = '';
+
+	orderno += pdict.Order.orderNo;
+	</isscript>
+	
+	<!-- START Google Analytics -->
+	<script type="text/javascript"> 
+	var allPACoupons = "";
+	<isloop items="${pdict.Order.getCouponLineItems()}" alias="cli" status="statusloop">
+		var couponCode, campaignID, couponVal = 0, quant = 0;
+		<isloop items="${cli.getPriceAdjustments()}" alias="pas" status="statusloop">
+	    	if(${pas.basedOnCoupon}){
+	    		quant += ${pas.getAppliedDiscount().getQuantity()};
+	    		campaignID = "${pas.campaignID}";
+				couponCode = "${pas.couponLineItem.couponCode}";
+				couponVal += ${pas.getPriceValue()};
+	    	}
+		</isloop>
+		if(quant > 0){
+			if(allPACoupons != ""){allPACoupons += ", ";}
+			allPACoupons += campaignID + " " + quant;
+		}
+		ga('send','event','CouponOLI',campaignID,couponCode,couponVal);
+	</isloop>
+	try
+	{
+		ga('require', 'ec');
+		<isloop items="${pdict.Order.allProductLineItems}" alias="pli" status="statusloop">
+			<isset name="SelectedColorValue" value="${pli.product.variationModel.getProductVariationAttribute('color')}" scope="page"/>
+			var coupon = "";
+			<isloop items="${pli.getPriceAdjustments()}" alias="pas" status="statusloop">
+				if("${pas.basedOnCoupon}"){
+					coupon += "${pas.campaignID}";
+					var couponCode = "${pas.couponLineItem.couponCode}";
+					var couponVal = "${pas.getProratedPrices().get(pli).getDecimalValue()}";
+					if(!${statusloop.last}){coupon += ", ";}
+				}
+			</isloop>
+			ga('ec:addProduct', {
+				"id": "${pli.product.ID}",
+				"name": "${pli.product.name}",
+				"category": "${pli.categoryID}",
+				"brand": "${pli.product.brand}",
+				"variant": "${pli.product.variationModel.getSelectedValue(SelectedColorValue).displayValue}",
+				"price": "${pli.adjustedPrice.value / pli.quantity.value}",
+				"quantity": "${pli.quantity.value}",
+				"coupon": coupon,
+				"position": "${pli.position}"
+			});
+		</isloop>
+		ga('ec:setAction','purchase',{
+			'id': '${orderno}',
+			'affiliation': 'southmoonunder.com',
+			'revenue': '${empty(pdict.Order.totalGrossPrice.value) ? "0.00" : pdict.Order.totalGrossPrice.value}',
+			'shipping': '${empty(pdict.Order.shippingTotalGrossPrice.value) ? "0.00" : pdict.Order.shippingTotalGrossPrice.value}',
+			'tax': '${empty(pdict.Order.totalTax.value) ? "0.00" : pdict.Order.totalTax.value}',
+			'coupon': allPACoupons
+		});
+		ga('send','event','Checkout','Enter Step','Confirmed');
+	} catch(err){console.log(err)} 
+	</script>
+	<!-- END Google Analytics -->
+	
+	
+</isif>
+
+
+<isscript>
+	pdict.trackOrder = false;
+</isscript>

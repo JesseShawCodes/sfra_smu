@@ -1,0 +1,20 @@
+<div class="cartModalWrap"><div class="cartModal">
+	<isif condition="${!pdict.CurrentCustomer.registered}">		
+		<div class="cartguest">
+			<h3>${Resource.msg('pt_cart.guestcheckout','checkout',null)}</h3>	
+			<iscomment><p>${Resource.msg('pt_cart.guestcheckouttext','checkout',null)}</p>
+			login/create account/guest checkout actions go to cart pipeline for continuation purpose i.e. users lands back on the cart page after these action.
+			  so moved the form definiton at the top of the div it is a secure url</iscomment>
+			<form action="${URLUtils.https('COShipping-Start')}" method="post" id="${pdict.CurrentForms.cart.dynamicHtmlName}" class="cartcontinue">
+				<fieldset>
+					<legend class=clearText>Guest Checkout</legend>
+					<iscomment>cancel class is required by client side validation plugin to bypass validation for this action</iscomment>
+					<button class="imagebutton checkoutnow" type="submit" value="${Resource.msg('pt_cart.guestcheckoutbutton','checkout',null)}" name="${pdict.CurrentForms.cart.unregistered.htmlName}"><span>${Resource.msg('pt_cart.guestcheckoutbutton','checkout',null)}</span></button>
+				</fieldset>
+			</form>
+		</div><!-- END: cartguest -->
+	</isif>
+	<div class="cartloginpanel">
+		<isinclude template="account/login/cartlogininclude"/>
+	</div>
+</div></div>

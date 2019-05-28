@@ -1,0 +1,90 @@
+<iscache status = "on" type="relative" hour="24"/>
+<isinclude template="util/modules"/>
+
+<iscomment>
+     This template displays a 3-level category tree as top navigation.
+     Only categories marked with showInMenu are shown.
+</iscomment>
+
+<isif condition="${dw.catalog.CatalogMgr.getSiteCatalog() != null}">
+     <isset name="root" value="${dw.catalog.CatalogMgr.getSiteCatalog().getRoot()}" scope="page" />
+</isif>
+<isset name="saleCategory" value="${dw.catalog.catalogmgr.getCategory('sale')" scope="page" />
+<isscript>
+     /*-- Get the current category level --*/
+     var catLevels : ArrayList = new dw.util.ArrayList();
+     var tempCat : Category = null;
+     tempCat = dw.catalog.CatalogMgr.getCategory(pdict.CurrentHttpParameterMap.cgid.value);
+     catLevels.push(tempCat)
+     if (!empty(tempCat)) {
+         while(!tempCat.isTopLevel()) {
+              tempCat = tempCat.parent;
+              catLevels.push(tempCat);
+         }
+         catLevels.reverse();
+     }
+</isscript>	
+<isif condition="${root != null}">
+<div class="categorymenu">
+	<ul>
+		<isloop items="${root.getOnlineSubCategories()}" var="topCat">
+			<isif condition="${('showInMenu' in topCat.custom) && topCat.custom.showInMenu.valueOf()}">
+				<li class="tabTop ${topCat.getID()}-nav">
+					<a class="tabLink" title="View ${topCat.getDisplayName()}" href="${URLUtils.https('Search-Show', 'cgid', topCat.getID())}" onclick="ga('send','event','Header','Top Click','${topCat.getDisplayName()}')">
+						<isif condition="${('dropNavTitleImage' in topCat.custom) && topCat.custom.dropNavTitleImage.valueOf() != null}">
+							<img class="titleImage" src="/on/demandware.static/-/Sites-southmoonunder-master/default/dwf934fc1e/${topCat.custom.dropNavTitleImage.valueOf()}" />
+						<iselseif condition="${!empty(catLevels.get(0)) && catLevels.get(0).getID() == topCat.getID()}">
+							<b><isprint value="${topCat.getDisplayName()}"/></b>
+						<iselse>
+							<isprint value="${topCat.getDisplayName()}"/>
+						</isif>
+					</a>
+					<iscomment>checking to see if we need a subnav</iscomment>
+					<div class="outerSubMenu ${topCat.getID()}">
+					<div class="midSubMenu">
+					<isif condition="${('showSubCats' in topCat.custom) && topCat.custom.showSubCats.valueOf()}">
+						<ul class="catSubMenu">
+							<isloop items="${topCat.getOnlineSubCategories()}" var="subCat">
+							<isif condition="${(('showInMenu' in subCat.custom) && subCat.custom.showInMenu.valueOf()) && 
+							(('hasOnlineProducts' in subCat.custom && subCat.custom.hasOnlineProducts) || (subCat.getOnlineSubCategories().length > 0))}">
+								<li>
+									<a title="View ${subCat.getDisplayName()}" class="subCatTitle" href="${URLUtils.https('Search-Show', 'cgid', subCat.getID())}" onclick="ga('send','event','Header','${topCat.getDisplayName()} Sub Click','${subCat.getDisplayName()}')">
+										<isif condition="${('dropNavTitleImage' in subCat.custom) && subCat.custom.dropNavTitleImage.valueOf() != null}">
+											<img class="titleImage" src="/on/demandware.static/-/Sites-southmoonunder-master/default/dwf934fc1e/${subCat.custom.dropNavTitleImage.valueOf()}" />
+										<iselse>
+											<span>${subCat.getDisplayName()}</span>
+										</isif> 
+									</a>
+									<isif condition="${('showSubCats' in subCat.custom) && subCat.custom.showSubCats.valueOf() && subCat.getOnlineSubCategories().size() > 0}">
+										<ul>
+										<isloop items="${subCat.getOnlineSubCategories()}" var="subsubCat">
+											<isif condition="${(('showInMenu' in subsubCat.custom) && subsubCat.custom.showInMenu.valueOf()) && 
+											(('hasOnlineProducts' in subsubCat.custom && subsubCat.custom.hasOnlineProducts) || (subsubCat.getOnlineSubCategories().length > 0))}">
+											<li>
+												<a title="View ${subsubCat.getDisplayName()}" class="subsubCatTitle" href="${URLUtils.https('Search-Show', 'cgid', subsubCat.getID())}" onclick="ga('send','event','Header','${topCat.getDisplayName()} SubSub Click','${subsubCat.getDisplayName()}')">
+												<span>${subsubCat.getDisplayName()}</span>
+												</a>
+											</li>
+											<isif condition="${('createSubBreak' in subsubCat.custom) && subsubCat.custom.createSubBreak.valueOf()}">
+												</ul><ul>
+											</isif>
+											</isif>
+										</isloop>
+										</ul>
+						   			</isif>
+								</li>
+						   	</isif>
+							</isloop>
+						</ul>	
+					</isif>
+					<div class="slotDiv">
+						<isslot id="dropDownRight" context="category" description="Content on right side of drop navs" context-object="${topCat}"/>	
+					</div>
+					</div>
+					</div>
+	            </li>
+   			</isif>
+		</isloop>
+	</ul>
+</div><!-- END: categorymenu -->
+</isif>

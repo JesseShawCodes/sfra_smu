@@ -1,0 +1,26 @@
+<isscript>
+	/*
+	*	Connection and initialization of important parts of the application
+	*/
+	importScript('int_monetate:monetate/libMonetate.ds');
+	var monetateObject : Object = new MonetateObject();
+</isscript>
+
+<isinclude template="util/modules"/>
+
+<script type="text/javascript">
+	/*
+	*	Writing cart rows to the temporary storage
+	*/
+	window.monetateData.addCartRows = <isprint value="${JSON.stringify(monetateObject.getCartRows(pdict.Basket))}" encoding="off" />;
+</script>
+
+<isif condition="${pdict.CurrentHttpParameterMap.format.stringValue == 'ajax'}">
+	<iscomment>Tracking PDP and CLP/PLP/Search pages after the add to cart event</iscomment>	
+	<script type="text/javascript">
+		if(["search", "index"].indexOf(monetateData.setPageType) != -1) monetateData.trackPLPPage();
+		if(monetateData.setPageType == "category") monetateData.trackCLPPage();
+		if(monetateData.setPageType == "product") monetateData.trackPDPPage();
+		if(monetateData.setPageType == "unknown") monetateData.trackUnknownPage();
+	</script>
+</isif>

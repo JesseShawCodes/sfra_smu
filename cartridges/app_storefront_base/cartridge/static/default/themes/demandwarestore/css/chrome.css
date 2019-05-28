@@ -1,0 +1,6 @@
+button.imagebutton span, a.imagebutton span {
+    margin-left: 30px;
+}
+button.addtocartbutton span {
+	margin-left: 0px !important;
+}

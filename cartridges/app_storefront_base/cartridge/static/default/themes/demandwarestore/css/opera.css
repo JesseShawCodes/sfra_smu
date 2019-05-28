@@ -1,0 +1,8 @@
+button.imagebutton span, a.imagebutton span {
+    margin-left: 30px;
+}
+button.imagebutton, a.imagebutton {
+    z-index:5;
+}
+button.imagebutton:active, a.imagebutton:active {background-position: 1px -69px;}
+

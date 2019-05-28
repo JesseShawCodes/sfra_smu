@@ -1,0 +1,69 @@
+<isdecorate template="account/pt_account">
+<isinclude template="util/modules"/>
+<div class="logintop">
+	<div style="height:30px;width:100%;background-color:#666">
+		<span style="line-height:30px;color:white;padding-left:30px;font-size:14px;font-weight:bold;">LOGIN</span>
+	</div>
+	<div style="margin:0 30px;">
+		<isbreadcrumbs bcurl1="${URLUtils.https('Account-Show')}" bctext1="Login" nounderline1="true"/>
+	</div>
+</div>
+<div class="accountlogin">
+	<iscomment><h1>${Resource.msg('account.header','account',null)}</h1></iscomment>
+	<isinclude template="account/login/logininclude"/>
+	<div class="logincreate">
+		<h3>${Resource.msg('globalaccount.createheader','locale',null)}</h3>
+		<div class="createaccount">
+			<p>${Resource.msg('globalaccount.createmessage','locale',null)}</p>
+			<form action="${URLUtils.httpsContinue()}" method="post" id="${pdict.CurrentForms.login.htmlName}_register">
+				<fieldset>
+				<legend class=clearText>Create Account</legend>
+					<div class="createaccountbutton">
+						<button class="imagebutton createaccount" type="submit" value="${Resource.msg('global.createbutton','locale',null)}" name="${pdict.CurrentForms.login.register.htmlName}"><span>${Resource.msg('global.createbutton','locale',null)}</span></button>
+					</div><!-- END: createaccountbutton -->
+					<input type="hidden" name="${pdict.CurrentForms.login.secureKeyHtmlName}" value="${pdict.CurrentForms.login.secureKeyValue}"/>
+				</fieldset>
+			</form>
+			<div class="createbenefits">
+				<iscomment>
+					<iscontentasset aid="create-account-benefits"/>
+				</iscomment>
+				<a href="${URLUtils.url('privacy-policy')}">${Resource.msg('account.benefitslink','account',null)}</a>
+			</div><!-- END: createbenefits -->
+			<div class="clear"><!-- FLOAT CLEAR --></div>
+		</div><!-- END: createaccount -->
+	</div><!-- END: logincreate -->
+	
+	<div class="logingeneral">
+		<h3>${Resource.msg('accountlogin.orderheader','account',null)}</h3>
+		<div class="checkorder">
+			<p>${Resource.msg('accountlogin.checkmessage','account',null)}</p>
+			<iscomment>Order Not Found Error Message</iscomment>
+			<isif condition="${pdict.OrderNotFound != null}">
+				<div class="errorform">${Resource.msg('accountlogin.ordererror','account',null)}</div><!-- END: errorform -->
+				
+			</isif>
+			<form action="${URLUtils.httpsContinue()}" method="post" id="${pdict.CurrentForms.ordertrack.htmlName}">
+				<fieldset>
+				<legend class=clearText>Track Order</legend>
+					<div class="formfield">
+						<isinputfield formfield="${pdict.CurrentForms.ordertrack.orderNumber}" type="input"/>
+						<div class="clear"><!-- FLOAT CLEAR --></div>
+					</div>
+					<div class="formfield">
+						<isinputfield formfield="${pdict.CurrentForms.ordertrack.postalCode}" type="input"/>
+						<div class="clear"><!-- FLOAT CLEAR --></div>
+					</div>
+					<div class="formactions">
+						<button class="imagebutton" type="submit" value="${Resource.msg('accountlogin.orderbutton','account',null)}" name="${pdict.CurrentForms.ordertrack.findorder.htmlName}"><span>${Resource.msg('accountlogin.orderbutton','account',null)}</span></button>
+					</div><!-- END: checkorder_button -->
+				</fieldset>
+			</form>
+			<div class="clear"><!-- FLOAT CLEAR --></div>
+		</div><!-- END: checkorder -->
+	</div><!-- END: logingeneral -->
+	<div class="clear"><!-- FLOAT CLEAR --></div>
+</div><!-- END: accountlogin -->
+
+<ismonetatetrackpage pagename="login" />
+</isdecorate>

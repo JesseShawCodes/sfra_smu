@@ -1,0 +1,7 @@
+<isif condition="${slotcontent != null}">	
+	<div class="homepage-background-image">
+		<isloop items="${slotcontent.content}" var="contentAsset" end="1">
+			<isprint value="${contentAsset.custom.body}" encoding="off"/>
+		</isloop>
+	</div>	
+</isif>

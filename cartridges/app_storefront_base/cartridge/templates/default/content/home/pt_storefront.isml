@@ -1,0 +1,129 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<isinclude template="util/modules"/>
+
+<iscomment>This page must be cachable. It inherits the caching attributes by the decorated template.</iscomment>
+
+<head>
+	<iscomment>Include all important information globally , e.g. meta-data, link information, and javascript.</iscomment>
+	<isinclude template="components/header/htmlhead"/>
+
+	<iscomment>Add page specific header information here.</iscomment>
+	
+    <iscomment>Insert meta tag for the "Google-Verification" feature to verify that you are the owner of this site.</iscomment>
+    <isif condition="${'GoogleVerificationTag' in dw.system.Site.current.preferences.custom && dw.system.Site.current.preferences.custom.GoogleVerificationTag!=''}">
+	    <isif condition="${request.httpProtocol == 'https'}">
+	    	<meta name="google-site-verification" content="<isprint value="${dw.system.Site.current.preferences.custom.GoogleVerificationTagSecure}"/>" />
+	    <iselse>
+			<meta name="google-site-verification" content="<isprint value="${dw.system.Site.current.preferences.custom.GoogleVerificationTag}"/>" />
+	    </isif>
+    </isif>
+    <iscomment>Criteo Tag for Home Page</iscomment>
+	<isif condition="${(!request.httpQueryString)||(request.httpQueryString.indexOf('speedtest') == -1)}">
+    <script type="text/javascript" src="//static.criteo.net/js/ld/ld.js" async="true"></script>
+	<script type="text/javascript">
+		window.criteo_q = window.criteo_q || [];
+		var deviceType= /iPad/.test(navigator.userAgent)?"t":/Mobile|iP(hone|od)|Android|BlackBerry|IEMobile|Silk/.test(navigator.userAgent)?"m":"d";
+		window.criteo_q.push(
+		{ event: "setAccount", account: 21144},
+		{ event: "setSiteType", type: deviceType},
+		{ event: "setEmail", email: [""]},
+		{ event: "viewHome"});
+	</script>
+	</isif>
+</head>
+<body>
+<!-- Google remarketing tag for Home page --> 
+<script>
+	var google_tag_params = {
+		ecomm_pagetype: 'home',
+	};
+</script>
+
+
+<isscript>
+	var category : Category = dw.catalog.CatalogMgr.getCategory("root");
+</isscript>
+
+<div id="container" class="pt_storefront p001">
+	
+    <div id="page">
+    	<isinclude url="${URLUtils.url('Home-IncludeHeader')}"/>
+	    <div id="main">
+	        <div id="content" tabindex="-1">
+	        	<isslot id="globalTopBanner" description="Banner on top of all pages" context="global" />
+				<iscontentasset aid="homeTopBanner" />
+		        <!-- The 'carousel' (typically a static image now) -->
+				<isinclude url="${URLUtils.url('Home-IncludeCarousel')}"/>
+				
+	            <isreplace/>
+	            
+	            <!-- Custom content -->
+	            <div class="hp-row row-one">
+	            	<div class="cols">
+			            <iscontentasset aid="row-one" />
+	        			<isslot id="row-one" description="row-one asset replacement on homepage" context="global" />
+		            </div>
+	            </div>
+	            <div class="hp-row row-two">
+	            	<div class="cols">
+			            <iscontentasset aid="row-two" />
+		            </div>
+	            </div>
+	            <div class="hp-row row-three">
+	            	<div class="cols">
+			            <iscontentasset aid="row-three" />
+		            </div>
+	            </div>
+	            <div class="hp-row row-four">
+	            	<div class="cols">
+			            <iscontentasset aid="row-four" />
+		            </div>
+	            </div>
+	            <div class="hp-row row-five">
+	            	<div class="cols">
+			            <iscontentasset aid="row-five" />
+		            </div>
+	            </div>
+	            <div class="hp-row row-six">
+	            	<div class="cols">
+			            <iscontentasset aid="row-six" />
+		            </div>
+	            </div>
+	            <div class="hp-row row-seven">
+	            	<div class="cols">
+			            <iscontentasset aid="row-seven" />
+		            </div>
+	            </div>
+	            <div class="hp-row row-eight">
+	            	<div class="cols">
+			            <iscontentasset aid="row-eight" />
+		            </div>
+	            </div>
+	            <div class="hp-row row-ten">
+	            	<div class="cols">
+			            <iscontentasset aid="row-ten" />
+		            </div>
+	            </div>
+	            <div class="hp-row row-eleven">
+	            	<div class="cols">
+			            <iscontentasset aid="row-eleven" />
+		            </div>
+	            </div>
+	            <div class="hp-row row-twelve">
+	            	<div class="cols">
+		    	        <iscontentasset aid="row-twelve" />
+		            </div>
+	            </div>
+	            
+	            <div class="clear"><!-- FLOAT CLEAR --></div>
+	        </div><!-- END: content -->
+	    </div><!-- END: main -->
+	    <iscomment> NEED TO ADD MONETATE - JESSE SHAW
+		<ismonetatetrackpage pagename="main" />
+          </iscomment>
+	    <isinclude template="components/footer/footer"/>
+    </div>
+</div><!-- END: container -->
+</body>
+</html>

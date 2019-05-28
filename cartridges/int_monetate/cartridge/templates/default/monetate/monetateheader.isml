@@ -1,0 +1,23 @@
+<isscript>
+	/*
+	*	Connection and initialization of important parts of the application
+	*/
+	importScript('int_monetate:monetate/libMonetate.ds');
+
+	var monetateObject : Object = new MonetateObject(),
+		monetateHeader : String = monetateObject.getMonetateTag();
+</isscript>
+
+
+<script type="text/javascript">
+	/*
+	*	Global Monetate array for tracking
+	*/
+	window.monetateQ = window.monetateQ || [];
+	
+	/*
+	*	Temporary storage for data: cartrows, breadcrumbs, products on the plp/clp/search pages
+	*/
+	window.monetateData = window.monetateData || {};
+	window.monetateData.setPageType = "unknown";
+</script>

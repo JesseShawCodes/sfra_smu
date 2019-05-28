@@ -1,0 +1,69 @@
+/**
+*	Script that manage large amout of products
+*
+*	@output Products : Array
+*	@output XSW : dw.io.XMLStreamWriter
+*	@output FileWriter : dw.io.FileWriter
+*	@output ExportFile : dw.io.File
+*	@output GZipFile : dw.io.File
+*/
+
+importPackage( dw.system );
+importPackage( dw.util );
+importPackage( dw.catalog );
+importPackage( dw.io );
+importPackage( dw.web );
+importPackage( dw.content );
+
+importScript('int_monetate:monetate/libMonetate.ds');
+
+function execute( args : PipelineDictionary ) : Number {
+	var monetateObject : Object = new MonetateObject(),
+		products : SeekableIterator = ProductMgr.queryAllSiteProducts(),
+		monetateFolder : File = new File (File.IMPEX + "/src/monetate/"),
+		preparedProducts : Array = [],
+		buffer : ArrayList = new ArrayList();
+	
+	/*
+	*	Create monetate folder in IMPEX
+	*/
+	monetateFolder.mkdirs();
+	
+	var calendarFormat : String = StringUtils.formatCalendar(Site.calendar,"yyyy_MM_dd_HH_mm"),
+		exportFile : File = new File (File.IMPEX + "/src/monetate/product_feed_" + calendarFormat + ".xml"),
+    	gzipFile : File = new File(File.IMPEX + "/src/monetate/product_feed_" + calendarFormat + ".xml.gz"),
+		fileWriter : FileWriter = new FileWriter(exportFile, "UTF-8"),
+		xsw : XMLStreamWriter = new XMLStreamWriter(fileWriter);
+		
+	/*
+	*	Starting writing XML document and write start element node(<catalog>)
+	*/
+	xsw.writeStartDocument("utf-8", "1.0");
+	xsw.writeStartElement("catalog");
+	
+	/*
+	*	Write element - <version>5</version>
+	*/
+	monetateObject.writeXMLElement(xsw, "version", 5);
+	
+	while (products.hasNext()) {
+		var product : Product = products.next();
+		
+		buffer.push(product.getID());
+		
+		if (buffer.length == 10000 || !products.hasNext()) {
+			preparedProducts.push(buffer.iterator());
+			buffer = new ArrayList();
+		}		
+	}
+	
+	products.close();
+	
+	args.Products = preparedProducts;
+	args.XSW = xsw;
+	args.FileWriter = fileWriter;
+	args.ExportFile = exportFile;
+	args.GZipFile = gzipFile;
+
+	return PIPELET_NEXT;
+}

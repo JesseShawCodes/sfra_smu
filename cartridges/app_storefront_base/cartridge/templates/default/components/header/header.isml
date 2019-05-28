@@ -1,0 +1,187 @@
+<script>
+jQuery(document).ready(function(){
+	/*-- Site Search Expand Button --*/
+	jQuery(".sitesearch fieldset").prepend("<div class='expandSearchBtn'></div>");
+	jQuery(".expandSearchBtn").css({
+		"position": "absolute",
+		"height": "25px",
+		"width": "27px",
+		"z-index": "1",
+		"cursor": "pointer"
+	});
+	/*-- expand search button --*/
+	jQuery(".expandSearchBtn").click(function(){
+		if(!jQuery(".sitesearch").hasClass("open")){
+			var expWidth = "243px";
+               // $(".minicart, a.userlogin").css("display", "none");
+               // $(".headerWrapper .sitesearch").css("margin-right", "0px");
+			if($(".headerWrapper-mobile").length){expWidth = (jQuery(".headerTitle").width() + 10)+"px";}
+			jQuery(".sitesearch input").animate({width: expWidth}, 500);
+			document.getElementById("searchinput").focus();
+			jQuery(".sitesearch").addClass("open");
+		} else {
+               // $(".minicart, a.userlogin").css("display", "initial");
+               // $(".headerWrapper .sitesearch").css("margin-right", "113px");
+			jQuery(".sitesearch input").animate({width: "0"}, 500);
+			jQuery(".sitesearch").removeClass("open");
+			document.getElementById("searchinput").blur();
+		}
+	});
+	var checkSearch = setInterval(function(){
+		if(document.getElementById("searchinput")){
+			document.getElementById("searchinput").onkeyup= function(){
+				if(this.value.length > 0){
+					jQuery(".expandSearchBtn").css("pointer-events", "none");
+				} else {
+					jQuery(".expandSearchBtn").css("pointer-events", "all");
+				}
+			};
+			clearInterval(checkSearch);
+		}
+	}, 100);
+	
+	/*-- remove extra minicart --*/
+	if(!( navigator.userAgent.match(/Android/i) || navigator.userAgent.match(/webOS/i) || navigator.userAgent.match(/iPhone/i)
+	 || navigator.userAgent.match(/iPad/i) || navigator.userAgent.match(/iPod/i) || navigator.userAgent.match(/BlackBerry/i)
+	 || navigator.userAgent.match(/Windows Phone/i) || navigator.userAgent.match(/Mobile/i))
+	){
+		jQuery(".categorymenu > ul").css("overflow", "hidden");
+		catSize();
+		jQuery(window).resize(function(){ catSize(); });
+		
+		$(".tabTop").bind("focusin",function(){
+			$(this).addClass("hovered");
+		});
+		$(".tabTop").bind("focusout",function(){
+			$(this).removeClass("hovered");
+		});
+	} else if( navigator.userAgent.match(/iPad/i)){
+		catSize();
+		jQuery(".catArrow").css("pointer-events", "none");
+		jQuery(window).resize(function(){
+			catSize();
+			jQuery(".catArrow").css("pointer-events", "none");
+		});
+	}
+	function catSize(){
+		var catWidth = 0;
+		jQuery(".categorymenu > ul > li").each(function(){
+			catWidth += jQuery(this).width();
+		});
+		if(jQuery(window).width() < catWidth){
+			if(jQuery(".catLeft").length == 0) {
+				jQuery(".categorymenu > ul").prepend("<div class='catLeft catArrow'></div><div class='catRight catArrow'></div>");
+				jQuery(".categorymenu li:first").css("margin-left", "15px");						
+			}
+		} else {
+			jQuery(".catLeft").remove();
+			jQuery(".catRight").remove();
+			jQuery(".categorymenu li:first").css("margin-left", "-7px");
+		}
+		jQuery(".catLeft").click(function(){
+			var li = jQuery(this).siblings("li:first");
+			var left = Number(li.css("margin-left").replace(/[^-\d\.]/g, '')) +30;
+			if(15 > left ){
+				li.css("margin-left", left +"px");
+			} else {
+				li.css("margin-left", "15px");
+			}
+		});
+		jQuery(".catRight").click(function(){
+			var li = jQuery(this).siblings("li:first");
+			var right = Number(li.css("margin-left").replace(/[^-\d\.]/g, '')) - 30;
+			if(-(catWidth-jQuery(this).parent().width()+20) < right ){
+				li.css("margin-left", (right) +"px");
+			} else {
+				li.css("margin-left", -(catWidth-jQuery(this).parent().width()+20) +"px");
+			}
+		});
+	}
+    if( navigator.userAgent.match(/iPad/i)){
+		/* remove link on iPad, but put it back once tab active */
+		$('.tabLink').each(function() {
+			var oldHref = $(this).attr("href");
+			var curTab = $(this);
+			$(this).removeAttr("href");
+			$(this)
+			.mouseenter(function(){
+				/* delay necesary, without it link is replaced and then followed immediately */
+				setTimeout(function () {
+					/* using (this) doesn't work here as scope has changed, curTab variable necesary */
+					curTab.attr("href",oldHref);
+					console.log(curTab);
+				},200);
+			})
+			.mouseleave(function(){
+				curTab.removeAttr("href");
+			});
+		});
+    }
+
+	$("#content").attr("tabindex","-1");
+	$(".tabLink .titleImage").parent().parent().addClass("hasImage");
+	if($(".searchresultsheaderBottom").html() != null){
+		$(".skip-links").append('<li><a class="hiddenSkip" href="#searchStart">Skip to product tiles</a></li>');
+	}
+	
+	/*-- Site Search FB tracking --*/
+	jQuery('#SimpleSearchForm').submit(function() {
+		var searchString = $('#searchinput').val();
+		fbq('track', 'Search', {
+			search_string: searchString
+		});
+	});
+});
+</script>
+<!-- Mobile Header -->
+<isif condition="${pdict.CurrentSession.custom.device == 'mobile'}">
+<div class="headerWrapper-mobile">
+     <div id="header">
+          <a><div class="headerMenu"></div></a>
+          <a href="${URLUtils.url('Home-Show')}"><div class="headerTitle"></div></a>
+          <iscomment>SEARCH BAR</iscomment>
+          <isinclude template="search/simplesearch"/>
+          <div id="miniCartWrapper">
+               <isinclude url="${URLUtils.url('mCart-MiniCart')}"/><!-- END:minicart -->
+     </div>
+     </div>
+     <div id="categoriesMenu" >
+         <iscomment>INCLUDE: category menu bar at the bottom of the header (it's computing intensive, it's cached)</iscomment>
+                   <isinclude url="${URLUtils.url('mHome-IncludeHeaderMenu', 'cgid', pdict.CurrentHttpParameterMap.cgid.value)}"/>
+     </div>
+     <div class="headerSpacer"></div>
+</div>
+<iselse>
+<div class="headerWrapper"><!-- Only styled on the Home page.  -->
+     <div id="header">
+         <div class="header-content">
+              <div class="inner">
+                   <iscomment>LOGO: Logo set with CSS as background image edit within CSS</iscomment>
+                   <ul class="skip-links">
+                        <li><a class="hiddenSkip" href="#content">Skip navigation bar, to main content</a></li>
+                        <li><a class="hiddenSkip" href="#footer-content">Skip to footer</a></li>
+                        <li><a class="hiddenSkip" href="https://www.southmoonunder.com/accessibility.html">Go to accessibility page, which lists keyboard commands</a></li>
+                   </ul>
+                   <div class="logo-wrapper">
+                        <isinclude url="${URLUtils.url('Home-IncludeHeaderCustomerInfo')}"/>
+                        <div class="logo"><a href="${URLUtils.httpsHome()}" title="${Resource.msg('global.storename','locale',null)}">${Resource.msg('global.storename','locale',null)}</a></div>
+                         <section class="right-header">
+                         <isif condition="${pdict.CurrentCustomer.registered}">
+                              <iselse>
+                              <a href="${URLUtils.https('Account-Show')}" title="Click to ${Resource.msg('global.login','locale',null)} or Register" class="userlogin">Account</a>
+                         </isif>
+                        <iscomment>INCLUDE: Mini-cart, do not cache</iscomment>
+                        <div id="minicart" class="minicart"><isinclude url="${URLUtils.url('Cart-MiniCart')}"/></div><!-- END:minicart -->
+                        <iscomment>SEARCH BAR</iscomment>
+                        <isinclude template="search/simplesearch"/>
+                        </section>
+
+                   </div>
+                   <iscomment>INCLUDE: category menu bar at the bottom of the header (it's computing intensive, it's cached)</iscomment>
+                   <isinclude url="${URLUtils.url('Home-IncludeHeaderMenu', 'cgid', pdict.CurrentHttpParameterMap.cgid.value)}"/>
+              </div>
+         </div>
+     </div><!-- END: header -->
+</div>
+</isif>
+

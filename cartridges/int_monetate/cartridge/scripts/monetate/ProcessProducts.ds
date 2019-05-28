@@ -1,0 +1,224 @@
+/**
+*	This script process and write products to the XML file
+*
+* 	@input XSW : dw.io.XMLStreamWriter
+* 	@input Products : dw.util.Iterator
+*/
+
+importPackage( dw.system );
+importPackage( dw.util );
+importPackage( dw.catalog );
+importPackage( dw.io );
+importPackage( dw.web );
+importPackage( dw.content );
+
+importScript('int_monetate:monetate/libMonetate.ds');
+
+/**
+*	Function that process and write products to the XML file
+*
+*	@param {PipelineDictionary} args Pipeline dictionary
+*/
+function execute( args : PipelineDictionary ) : Number {
+	var monetateObject : Object = new MonetateObject(),
+		xsw : XMLStreamWriter = args.XSW,
+        productsIterator : Iterator = args.Products,
+        config : Object = {
+            useVariation : Site.getCurrent().getCustomPreferenceValue("monetateVariationInFeed"),
+            productImage : !empty(Site.getCurrent().getCustomPreferenceValue("monetateImageProductSelector")) ? Site.getCurrent().getCustomPreferenceValue("monetateImageProductSelector") : "large",
+            searchImage : !empty(Site.getCurrent().getCustomPreferenceValue("monetateImageSearchSelector")) ? Site.getCurrent().getCustomPreferenceValue("monetateImageSearchSelector") : "medium",
+            endCapImage : !empty(Site.getCurrent().getCustomPreferenceValue("monetateImageEndCapSelector")) ? Site.getCurrent().getCustomPreferenceValue("monetateImageEndCapSelector") : "small"
+        };
+
+
+	
+	while (!empty(productsIterator) && productsIterator.hasNext()) {
+		var productID : String  = productsIterator.next(),
+			product : Product = ProductMgr.getProduct(productID);
+		
+	        createProductXML(monetateObject, xsw, product, config);
+	}
+	
+	return PIPELET_NEXT;
+}
+
+/**
+*	Function that write element <product> to the feed
+*
+*	@param {Object} monetateObject Object which is realizing all function necessary to work with Monetate
+*	@param {XMLStreamWriter} xsw XML Stream Writer
+*	@param {Product} product Current product
+*/
+   function createProductXML(monetateObject : Object, xsw : XMLStreamWriter, product : Product, config : Object) {
+        var rule : Boolean = false;
+
+   		if (config.useVariation == "variant"){
+   			rule = product.online && product.searchable;
+   		};
+		if (config.useVariation == "master"){
+		   	rule = product.online && product.searchable && !product.variant;
+	 	};
+    
+    if(rule) {
+
+		
+		/*
+		*	Define data about product and categories for feed generating
+		*/
+		var categories : Iterator = (!empty(product.getVariationModel().getVariants())) ? product.getVariationModel().getMaster().getOnlineCategories().iterator() : product.getOnlineCategories().iterator(),
+			productID : String = (!empty(product.getID()) ? product.getID() : ""),
+			productName : String = (!empty(product.getName()) ? product.getName() : ""),
+			productDescription : String = (!empty(product.getShortDescription()) ? product.getShortDescription().toString() : ""),
+			productBrandName : String = (!empty(product.getBrand()) ? product.getBrand() : ""),
+			productUrl : String = URLUtils.https("Product-Show", "pid", product.getID()),
+			altPrice : Number = (product.productSet) ? monetateObject.getProductSetPrice(product.getProductSetProducts()).altPrice : ((!empty(product.getVariationModel().getVariants()) && product.isMaster()) ? product.getVariationModel().getDefaultVariant().getPriceModel().getPriceBookPrice(monetateObject.getMonetatePriceBookId()).getValue() : product.getPriceModel().getPriceBookPrice(monetateObject.getMonetatePriceBookId()).getValue()),
+			price : Number = (product.productSet) ? monetateObject.getProductSetPrice(product.getProductSetProducts()).price : ((!empty(product.getVariationModel().getVariants()) && product.isMaster()) ? product.getVariationModel().getDefaultVariant().getPriceModel().getPriceBookPrice(monetateObject.getMonetateSalePriceBookId()).getValue() : product.getPriceModel().getPriceBookPrice(monetateObject.getMonetateSalePriceBookId()).getValue()),
+			productAltPrice : Number = ((altPrice > 0) ? altPrice : price).toFixed(2),
+			productPrice : Number = ((price > 0) ? price : altPrice).toFixed(2),
+			productSKU : String = (!empty(product.getManufacturerSKU()) ? product.getManufacturerSKU() : ""),
+            productImageUrl : String = (!empty(product.getImages(config.productImage)) ? product.getImages(config.productImage)[0].getHttpsURL() : ""),
+            endcapImageUrl : String = (!empty(product.getImages(config.endCapImage)) ? product.getImages(config.endCapImage)[0].getHttpsURL() : ""),
+            searchImageUrl : String = (!empty(product.getImages(config.searchImage)) ? product.getImages(config.searchImage)[0].getHttpsURL() : ""),
+			availability : String = (product.getAvailabilityModel().isInStock()) ? "In Stock" : "Out of Stock",
+			ats : String = (!empty(product.getAvailabilityModel().getInventoryRecord()) ? product.getAvailabilityModel().getInventoryRecord().getATS().getValue() : ""), //available to sell 
+			allocation : String = (!empty(product.getAvailabilityModel().getInventoryRecord()) ? product.getAvailabilityModel().getInventoryRecord().getAllocation().getValue() : ""), //all products to sell
+			productVariationModel : ProductVariationModel = product.getVariationModel(),
+			variationAttributes : Collection = productVariationModel.getProductVariationAttributes(),
+			variationAttributesIterator : Iterator = variationAttributes.iterator(),
+			rating : String = ('StarRatingCount' in product.custom) ? product.custom.StarRatingCount : ""; //power reviews raiting
+			
+		/*
+		*	Write start element <product>
+		*/
+		xsw.writeStartElement("product");
+		
+			/*
+			*	Write element - <product_id></product_id>
+			*/
+			monetateObject.writeXMLElement(xsw, "product_id", productID);
+			
+			/*
+			*	Write element - <product_name></product_name>
+			*/
+			monetateObject.writeXMLElement(xsw, "product_name", productName);
+			
+			/*
+			*	Write element - <product_description></product_description>
+			*/
+			monetateObject.writeXMLElement(xsw, "product_description", productDescription);
+			
+			/*
+			*	Write element - <skus></skus>
+			*/
+			xsw.writeStartElement("skus");
+				xsw.writeStartElement("sku");
+					xsw.writeCharacters(productSKU);
+				xsw.writeEndElement();
+			xsw.writeEndElement();
+
+			/*
+			*	Write element - <brand_name></brand_name>
+			*/
+			monetateObject.writeXMLElement(xsw, "brand_name", productBrandName);
+			
+			/*
+			*	Write elements - <categories></categories>
+			*/
+			xsw.writeStartElement("categories");
+			while (!empty(categories) && categories.hasNext()) {
+				
+				var category : Category = categories.next();
+				
+				while(!empty(category.parent)) {
+					if(category.online && !category.isRoot()) {
+						xsw.writeStartElement("category");
+							xsw.writeStartElement("category_id");
+								xsw.writeCharacters(category.getID());
+							xsw.writeEndElement();
+							xsw.writeStartElement("category_name");
+								xsw.writeCharacters(category.getDisplayName());
+							xsw.writeEndElement();
+						xsw.writeEndElement();
+					}
+			
+					category = category.parent;
+				}	
+			}
+			xsw.writeEndElement();			
+			/*
+			*	Write element - <price></price>
+			*/
+			monetateObject.writeXMLElement(xsw, "price", productPrice);
+			
+			/*
+			*	Write element - <alt_price></alt_price>
+			*/
+			monetateObject.writeXMLElement(xsw, "alt_price", productAltPrice);
+			
+			/*
+			*	Write element - <url></url>
+			*/
+			monetateObject.writeXMLElement(xsw, "url", productUrl);
+			
+			/*
+			*	Write element - <product_image_url></product_image_url>
+			*/
+			monetateObject.writeXMLElement(xsw, "product_image_url", productImageUrl);
+			
+			/*
+			*	Write element - <endcap_image_url></endcap_image_url>
+			*/
+			monetateObject.writeXMLElement(xsw, "endcap_image_url", endcapImageUrl);
+		
+			/*
+			*	Write element - <search_image_url></search_image_url>
+			*/
+			monetateObject.writeXMLElement(xsw, "search_image_url", searchImageUrl);
+			
+			/*
+			*	Write element - <availability></availability>
+			*/
+			monetateObject.writeXMLElement(xsw, "availability", availability);
+			
+			/*
+			*	Write element - <ats></ats>
+			*/
+			monetateObject.writeXMLElement(xsw, "ats", ats);
+			
+			/*
+			*	Write element - <allocation></allocation>
+			*/
+			monetateObject.writeXMLElement(xsw, "allocation", allocation);
+			
+			/*
+			*	Write element - <variations></variations>
+			*/
+			xsw.writeStartElement("variations");
+				while (!empty(variationAttributesIterator) && variationAttributesIterator.hasNext()) {
+					var variation : ProductVariationAttribute = variationAttributesIterator.next(),
+						variationID : String = variation.getAttributeID(),
+						variationValues : Iterator = productVariationModel.getAllValues(variation).iterator();
+						
+					
+					xsw.writeStartElement(variationID);	
+						while (!empty(variationValues) && variationValues.hasNext()) {
+							var variationValue : ProductVariationAttributeValue = variationValues.next();
+							
+							monetateObject.writeXMLElement(xsw, "option", variationValue.displayValue);
+						}
+					xsw.writeEndElement();
+				}
+			xsw.writeEndElement();
+			
+			/*
+			*	Write element - <rating></rating>
+			*/
+			monetateObject.writeXMLElement(xsw, "rating", rating);
+		
+		/*
+		*	Write end element node </product>
+		*/
+		xsw.writeEndElement();
+		
+	}
+}

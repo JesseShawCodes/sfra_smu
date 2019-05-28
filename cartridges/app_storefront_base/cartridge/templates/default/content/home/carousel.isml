@@ -1,0 +1,7 @@
+<isif condition="${pdict.CurrentSession.custom.device == 'mobile'}">
+	<isslot id="carousel-mobile" description="carousel on mobile homepage" context="global" />
+<iscomment><iselseif condition="${pdict.CurrentSession.custom.device == 'tablet'}">
+	<isslot id="carousel-iPad" description="carousel on iPad homepage" context="global" /></iscomment>
+<iselse>
+	<isslot id="carousel" description="carousel on homepage" context="global" />
+</isif>

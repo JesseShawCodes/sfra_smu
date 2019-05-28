@@ -1,0 +1,13 @@
+<!--- TEMPLATENAME: brontofooter.isml --->
+<isif condition="${!empty(pdict.Order) && !empty(pdict.Order.orderNo)}">
+	<isset name="orderNo" value="${pdict.Order.getOrderNo()}" scope="page" />
+<iselse>
+	<isset name="orderNo" value="" scope="page" />
+</isif>f
+<iscomponent pipeline="BrontoViews-TrackConversion" />
+<iscomponent pipeline="BrontoViews-CaptureTID" orderno="${orderNo}" />
+<iscomponent pipeline="BrontoViews-CartRecovery" orderno="${orderNo}" />
+<iscomponent pipeline="BrontoViews-CartRecoverySnippet" />
+<iscomponent pipeline="BrontoViews-PopUpManager" />
+<iscomponent pipeline="BrontoViews-CouponManager" orderno="${orderNo}" />
+<iscomponent pipeline="BrontoViews-CouponAutoApply" />

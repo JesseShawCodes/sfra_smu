@@ -1,0 +1,37 @@
+<isdecorate template="account/pt_account"/>
+<isinclude template="util/modules"/>
+<style>
+.needhelp {display:none;}
+.testPage {margin: 30px 0 20px;}
+.testPage h1 {padding: 15px 0 3px 0;}
+.testPage textarea {width:100%;}
+.testPage textarea:invalid {display: none;}
+</style>
+<div class="testPage">
+	<isset name="daysBack" value="30" scope="page"/>
+	<isif condition="${(request.httpQueryString)&&(request.httpQueryString.indexOf('days') != -1)}">
+		<isset name="daysBack" value="${pdict.CurrentHttpParameterMap.days}" scope="page"/>
+	</isif>
+	<isset name="newArrivals" value="${dw.catalog.CatalogMgr.getCategory('newarrivals')}" scope="page"/>
+	<isset name="newArrivalsSubs" value="${newArrivals.getOnlineSubCategories()}" scope="page"/>
+	<isset name="newArrivalProducts" value="${newArrivals.getOnlineProducts()}" scope="page"/>
+	<isset name="cutoffDate" value="${new Date() - (86400000 * daysBack)}" scope="page"/>
+	<h1>SKUs in <isprint value="${newArrivals.getID()}"/> with Arrival Date before <isprint value="${new Date(cutoffDate)}"/>: (${daysBack} days ago)</h1>
+	<iscomment>Any line breaks or tabs in this textarea pass to the output, so this has to be one line.</iscomment>
+	<textarea required><isloop items="${newArrivalProducts}" var="NAproduct"><isif condition="${(NAproduct.custom.smu_arr_date <= cutoffDate)&&(NAproduct.getAvailabilityModel().isInStock())}">${NAproduct.getID()},</isif></isloop></textarea>
+	<isloop items="${newArrivalsSubs}" var="newArrivalSub">
+		<isset name="newArrivalsSubSubs" value="${newArrivalSub.getOnlineSubCategories()}" scope="page"/>
+		<isset name="newArrivalSubProducts" value="${newArrivalSub.getOnlineProducts()}" scope="page"/>
+		<h1>SKUs in <isprint value="${newArrivalSub.getID()}"/> with Arrival Date before <isprint value="${new Date(cutoffDate)}"/>:</h1>
+		<textarea required><isloop items="${newArrivalSubProducts}" var="NAproduct"><isif condition="${(NAproduct.custom.smu_arr_date <= cutoffDate)&&(NAproduct.getAvailabilityModel().isInStock())}">${NAproduct.getID()},</isif></isloop></textarea>
+		<isif condition="${newArrivalsSubSubs != null}">
+		<isloop items="${newArrivalsSubSubs}" var="newArrivalSubSub">
+			<isset name="newArrivalSubSubProducts" value="${newArrivalSubSub.getOnlineProducts()}" scope="page"/>
+			<h1>SKUs in <isprint value="${newArrivalSubSub.getID()}"/> with Arrival Date before <isprint value="${new Date(cutoffDate)}"/>:</h1>
+			<textarea required style="margin-left:20px"><isloop items="${newArrivalSubSubProducts}" var="NAproduct"><isif condition="${(NAproduct.custom.smu_arr_date <= cutoffDate)&&(NAproduct.getAvailabilityModel().isInStock())}">${NAproduct.getID()},</isif></isloop></textarea>
+		</isloop>
+		</isif>
+	</isloop>
+	<div class="clear"></div>
+</div><!--end testPage-->
+</isdecorate>

@@ -1,0 +1,220 @@
+<isset name="DecoratorTemplate" value="search/pt_productsearchresult" scope="page"/>
+<isif condition="${pdict.CurrentHttpParameterMap.format.stringValue == 'ajax'}">
+	<isset name="DecoratorTemplate" value="util/pt_empty" scope="page"/>
+</isif>
+<isdecorate template="${DecoratorTemplate}">
+<iscomment>
+	Use the decorator template based on the requested output. If
+	a partial page was requested an empty decorator is used.
+	The default decorator for the product hits page is
+	search/pt_productsearchresult.
+</iscomment>
+
+<iscache status="off"/>
+<isinclude template="util/modules"/>
+
+<script type="text/javascript">monetateData.addProducts = [];</script>
+
+<iscomment>
+	Configured as default template for the product search results.
+	Displays a global slot with static html and the product search
+	result grid.
+</iscomment>
+
+<iscomment>create reporting event</iscomment>
+<isinclude template="util/reporting/ReportSearch.isml"/>
+
+<iscomment>Load custom CSS file on demand</iscomment>
+<script type="text/javascript"><!--
+app.util.clearDynamicCSS();
+
+<isif condition="${!empty(pdict.ProductSearchResult) && pdict.ProductSearchResult.category != null}">
+	<isscript>
+		var categoryCustomCSS = new dw.util.ArrayList();
+		var category = pdict.ProductSearchResult.category;
+		
+		if ( category != null )
+		{
+			while( category.parent != null )
+			{
+				if( category.online && ('customCSSFile' in category.custom) && !empty(category.custom.customCSSFile)) 
+				{
+					categoryCustomCSS.addAt( 0, category );
+				}
+				category = category.parent;
+			}
+		}
+	</isscript>
+
+	<isloop items="${categoryCustomCSS}" var="category">
+		app.util.loadCSSFile("${category.custom.customCSSFile.url}");
+	</isloop>
+</isif>
+//--></script>
+<isif condition="${pdict.CurrentSession.custom.Unlock != 'signedUp'}">
+<div class="signUp">
+<form class="maillist suppress" id="emailsignup_lock" method="post" name="emailsignup_lock">
+		<label for="userEmailFeild">Sign up to view this private sale!</label>
+		<div class="noWrap"><input class="required" id="userEmailFeild" name="email" placeholder="Enter your email" type="email" /><input class="submit" type="submit" value="SIGN UP" />
+</form>
+<script>
+$(".signUp #emailsignup_lock").submit(function(){
+	var email = $(this).find('input#userEmailFeild').val();
+    // nothing entered
+    console.log(email);
+    if(!email){
+    	console.log("No email");
+        return false;
+    }else{
+    // load gift certificate details
+    var url = app.util.appendParamToURL("${URLUtils.https('Opt-Unlock')}", "email", email);
+    var result = app.ajax.getJson({
+        url: url,
+        callback: function(data) {
+        	console.log("called back");
+        	if(data){
+        		window.location.reload(true);
+        	}
+            if(!data) {
+            	alert("Something went wrong. Please refresh and try again.");
+            }
+        }
+    });
+    }
+});
+</script>
+</div>
+<iselse>
+<div class="producthits">
+
+	<iscomment>used to be above the hits div not wrapped in div</iscomment>
+	<div class="productsearchtop">
+		<iscomment><isinclude template="search/components/productsearchbreadcrumbs"/></iscomment>
+	
+		<iscomment>suggest similar search phrase below the breadcrumb</iscomment>
+		<isif condition="${!empty(pdict.ProductSearchResult.getSuggestedSearchPhrase())}">
+			<div class="didyoumean">
+				${Resource.msg('search.nohits.didyoumeanex','search',null)}
+				<a title="${pdict.ProductSearchResult.suggestedSearchPhrase}" href="<isprint value="${URLUtils.https('Search-Show','q',pdict.ProductSearchResult.suggestedSearchPhrase)}"/>"><isprint value="${pdict.ProductSearchResult.suggestedSearchPhrase}"/></a>
+			</div>
+		</isif>
+	</div>
+
+
+	<iscomment>
+		Render promotional content at the top of search results as global slot.
+		This content is only displayed if the search result is refined by a category.
+		If the search result is not refined by a category a global default is displayed.
+	</iscomment>
+	<isif condition="${!empty(pdict.ProductSearchResult.category)}">
+		<isif condition="${false}">
+       		<isslot id="cat-landing-slotbanner" context="category" description="Large Category Landing Banner" context-object="${pdict.ProductSearchResult.category}"/>
+			<isslot id="predictive-PDP-4" context="category" description="second slot again, but with category Context" context-object="${pdict.ProductSearchResult.category}"/>
+       	</isif>
+	<iselse/>
+		
+	</isif>
+
+	<div id="search" class="search">
+		<iscomment>
+			<isif condition="${!empty(pdict.ProductSearchResult) && !empty(pdict.ProductSearchResult.searchPhrase) && !empty(pdict.ProductSearchResult.count)}">
+				<div class="hitsnum"><span>Your Search: ${pdict.ProductSearchResult.searchPhrase} - ${pdict.ProductSearchResult.count} matches</span></div>
+			</isif>
+		</iscomment>
+
+
+		<isif condition="${!pdict.ProductSearchResult.refinedSearch && !empty(pdict.ContentSearchResult) && pdict.ContentSearchResult.count > 0}">
+			
+			<div class="searchinformation">
+				${Resource.msgf('contenthitcount.yoursearch','search',null,pdict.ContentSearchResult.count)} &gt;
+				<a href="${'#relatedarticles'}">${Resource.msg('contenthitcount.goto','search',null)}</a>
+			</div><!-- END: searchinformation -->
+		</isif>
+
+		<isscript>
+			var selectedString = 'selected="selected"';
+		</isscript>
+
+		<isif condition="${!pdict.ProductPagingModel.empty}">
+
+			<div class="productresultarea">
+		    	<isproductgrid producthits="${pdict.ProductPagingModel.pageElements}" productrows="${1000}" productstoskip="${0}" productsperrow="${3}" pagingmodel="${pdict.ProductPagingModel}" scope="search"/>
+			</div><!-- END: productresultarea -->
+			
+			<iscomment>bottom pagination</iscomment>
+			<div class="searchresultsheader">
+				<iscomment>pagination</iscomment>
+				<ispagingbar pageurl="${pdict.ProductSearchResult.url('Search-Show')}" pagingmodel="${pdict.ProductPagingModel}"/>
+				
+				<div class="sorthitscontainer">			                
+		             <ispaginginformation pagingmodel="${pdict.ProductPagingModel}" pageurl="${pdict.ProductSearchResult.url('Search-Show')}"/>
+		             <div class="clear"><!-- FLOAT CLEAR --></div>
+		         </div><!-- END: sorthitscontainer -->
+	            <div class="clear"><!-- FLOAT CLEAR --></div>
+			</div><!-- END: searchresultsheader -->
+			
+			<isif condition="${!pdict.ProductSearchResult.refinedSearch && !empty(pdict.ContentSearchResult) && pdict.ContentSearchResult.count > 0}">	
+				<iscomment><div class="searchresultsfooter">
+					
+					<ispagingbar pageurl="${pdict.ProductSearchResult.url('Search-Show')}" pagingmodel="${pdict.ProductPagingModel}"/>
+					<div class="sorthitscontainer">
+		                sort by
+		                <isproductsortingoptions productsearchmodel="${pdict.ProductSearchResult}" pagingmodel="${pdict.ProductPagingModel}"/>
+		                <ispaginginformation pagingmodel="${pdict.ProductPagingModel}" pageurl="${pdict.ProductSearchResult.url('Search-Show')}"/>
+		                <div class="clear"><!-- FLOAT CLEAR --></div>
+		            </div><!-- END: sorthitscontainer -->
+		            <div class="clear"><!-- FLOAT CLEAR --></div>
+				</div></iscomment><!-- END: searchresultsfooter -->
+				
+				<iscomment>show top content hits</iscomment>
+			
+				<div class="searchinformation">
+					${Resource.msgf('contenthitcount.yoursearch','search',null,pdict.ContentSearchResult.count)} &gt;
+					<a href="${'#relatedarticles'}">${Resource.msg('contenthitcount.goto','search',null)}</a>
+				</div><!-- END: searchinformation -->
+				
+				<isinclude template="search/topcontenthits"/>
+				
+				<div class="contentsearchbottom">
+					<div class="contentsearchbottomone">
+						<isslot id="content-search-bottom-one" description="Promo one content search" context="global"/>
+					</div>
+					<div class="contentsearchbottomtwo">
+						<isslot id="content-search-bottom-two" description="Promo one content search" context="global"/>
+					</div>
+					<div class="contentsearchbottomthree">
+						<isslot id="content-search-bottom-three" description="Promo one content search" context="global"/>
+					</div>		
+				</div>
+			</isif>
+
+		<iselse/>
+
+			<iscomment>display no results</iscomment>
+			<isif condition="${pdict.ProductSearchResult.category.parent.parent.ID == 'look-book-2018'}" >
+				<isslot id="predictive-in-LB" description="recos if LB set is sold out" context="global" />
+			<iselse>
+				<div class="noresults">
+					${Resource.msg('productresultarea.noresults','search',null)}
+				</div><!-- END: noresults -->
+			</isif>
+
+		</isif>
+	</div><!-- END: search -->
+
+	<iscomment>Render promotional content at the bottom of search results; unique and global slots</iscomment>
+	<isslot id="cat-landing-slotnewbottom" context="category" description="Category Landing Featured Products or Promotional Content" context-object="${pdict.ProductSearchResult.category}"/>	
+	<isif condition="${false}">
+	<div style="display:none !important"><isslot id="dropDownRight" context="category" description="Content on right side of drop navs" context-object="${pdict.ProductSearchResult.category}"/></div>
+	</isif>
+	<div class="globalpromo">
+		<isslot id="search-promo" description="Promotional Content at the bottom of Search Results" context="global"/>
+	</div>
+</div><!-- END: producthits -->
+</isif>
+
+<iscomment>Include inline JS to update the refinements</iscomment>
+<iscomment><isinclude template="search/components/jsrefinementsupdate"/></iscomment>
+
+<ismonetatetrackpage pagename="index" />
+</isdecorate>

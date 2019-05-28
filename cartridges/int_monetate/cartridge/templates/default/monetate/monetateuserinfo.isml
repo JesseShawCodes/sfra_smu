@@ -1,0 +1,12 @@
+<iscomment>Populated user infromation into JS variables</iscomment>
+<isscript>
+	importScript('int_monetate:monetate/libMonetate.ds');
+	
+	var monetateObject : Object = new MonetateObject();
+</isscript>
+
+<isif condition="${pdict.CurrentCustomer.authenticated && pdict.CurrentCustomer.registered}">
+	<script type="text/javascript">
+		var mUser = <isprint value="${JSON.stringify(monetateObject.getUserInfo(pdict.CurrentCustomer.profile))}" encoding="off" /> 
+	</script>
+</isif>

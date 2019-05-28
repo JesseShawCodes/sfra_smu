@@ -1,0 +1,120 @@
+<iscomment>
+	This is the module template for tracking all pages.
+
+	Parameters:
+	
+	pagename : String, type of the page which we need to track
+			
+</iscomment>
+
+<isscript>
+	importScript('int_monetate:monetate/libMonetate.ds');
+	
+	var monetateObject : Object = new MonetateObject(),
+		monetatePageName : String = pdict.pagename || "",
+		pages : Array = ["main", "cart", "login", "account", "shipping", "billing", "checkout", "checkoutLogin", "orderstatus", "wishlist", "signup"];
+</isscript>
+
+<iscomment>Tracking pages which have type: "main", "cart", "login", "account", "shipping", "billing", "checkout", "checkoutLogin", "orderstatus", "wishlist", "signup"</iscomment>
+<isif condition="${pages.indexOf(monetatePageName) != -1}">
+	
+	<script type="text/javascript">
+		monetateData.setPageType = "${monetatePageName}";
+
+		window.monetateQ.push(["setPageType", monetateData.setPageType]);
+
+		if(monetateData.addCartRows) window.monetateQ.push(["addCartRows", monetateData.addCartRows]);
+		if(monetateData.breadCrumbs) window.monetateQ.push(["addBreadcrumbs", monetateData.breadCrumbs]);
+
+		window.monetateQ.push(["trackData"]);
+	</script>
+
+<iscomment>Tracking pages which have type: "search", "category"</iscomment>	
+<iselseif condition="${['search', 'index'].indexOf(monetatePageName) != -1}">
+
+	<script type="text/javascript">
+		monetateData.setPageType = "${!empty(pdict.CurrentHttpParameterMap.q.value) ? "search" : "index"}";
+
+		monetateData.trackPLPPage = function() {
+			window.monetateQ.push(["setPageType", monetateData.setPageType]);
+
+			if(monetateData.addCartRows) window.monetateQ.push(["addCartRows", monetateData.addCartRows]);
+			if(monetateData.addProducts) window.monetateQ.push(["addProducts", monetateData.addProducts]);
+
+			window.monetateQ.push(["addBreadcrumbs", <isprint value="${JSON.stringify(monetateObject.getCLPBreadCrumbs(pdict.ProductSearchResult))}" encoding="off" />]);
+
+			<isif condition="${!empty(pdict.CurrentHttpParameterMap.cgid.value)}">
+				monetateData.addCategories = "${pdict.CurrentHttpParameterMap.cgid.value}";
+				window.monetateQ.push(["addCategories", ["${pdict.CurrentHttpParameterMap.cgid.value}"]]);
+			</isif>
+
+			window.monetateQ.push(["trackData"]);
+		};
+
+		monetateData.trackPLPPage();
+	</script>
+
+<iscomment>Tracking page which have type: "product"</iscomment>	
+<iselseif condition="${monetatePageName.equals("product")}">
+	<isset name="Product" value="${!empty(pdict.Product) ? pdict.Product : pdict.MProduct}" scope="page" />
+	<script type="text/javascript">
+		if(${pdict.Product.productSet}){
+			monetateData.setPageType = "productSet";
+		}else{
+			monetateData.setPageType = "product";
+		}
+		monetateData.currentProductId = '<isprint value="${Product.ID}" encoding="off" />';
+		monetateData.prevProductId = monetateData.prevProductId || "";
+		
+		monetateData.trackPDPPage = function() {
+			window.monetateQ.push(["setPageType", monetateData.setPageType]);
+			
+			if(monetateData.addCartRows) window.monetateQ.push(["addCartRows", monetateData.addCartRows]);
+			
+			window.monetateQ.push(["addBreadcrumbs", <isprint value="${JSON.stringify(monetateObject.getPDPBreadCrumbs(Product))}" encoding="off" />]);
+			window.monetateQ.push(["addProductDetails", <isprint value="${JSON.stringify(monetateObject.getProductDetails(Product))}" encoding="off" />]);
+			window.monetateQ.push(["trackData"]);
+		};
+		
+		if (monetateData.prevProductId !== monetateData.currentProductId){
+			monetateData.prevProductId = monetateData.currentProductId;
+			monetateData.trackPDPPage();
+		}
+	</script>
+
+<iscomment>Tracking page which have type: "purchase"</iscomment>	
+<iselseif condition="${monetatePageName.equals("purchase")}">
+
+	<script type="text/javascript">
+		monetateData.setPageType = "purchase";
+	
+		window.monetateQ.push(["setPageType", monetateData.setPageType]);
+		window.monetateQ.push(["addPurchaseRows", <isprint value="${JSON.stringify(monetateObject.getPurchaseRows(pdict.Order))}" encoding="off" />]);
+		window.monetateQ.push(["trackData"]);
+	</script>
+
+<iscomment>Tracking page which have type: "category"</iscomment>	
+<iselseif condition="${monetatePageName.equals("category")}">
+
+	<script type="text/javascript">
+		monetateData.setPageType = "category";
+		
+		monetateData.trackCLPPage = function() {
+			window.monetateQ.push(["setPageType", monetateData.setPageType]);
+		
+			if(monetateData.addCartRows) window.monetateQ.push(["addCartRows", monetateData.addCartRows]);
+			
+			window.monetateQ.push(["addBreadcrumbs", <isprint value="${JSON.stringify(monetateObject.getCLPBreadCrumbs(pdict.ProductSearchResult))}" encoding="off" />]);
+			
+			<isif condition="${!empty(pdict.CurrentHttpParameterMap.cgid.value)}">
+				monetateData.addCategories = "${pdict.CurrentHttpParameterMap.cgid.value}";
+				window.monetateQ.push(["addCategories", ["${pdict.CurrentHttpParameterMap.cgid.value}"]]);
+			</isif>
+		
+			window.monetateQ.push(["trackData"]);
+		};
+		
+		monetateData.trackCLPPage();
+	</script>
+
+</isif>

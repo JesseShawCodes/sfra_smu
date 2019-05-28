@@ -1,0 +1,26 @@
+<iscache status="on" type="relative" hour="24"/>
+<isdecorate template="content/home/pt_storefront">
+
+<iscomment>this is the template rendering the homepage. This file (2) is the one used.</iscomment>
+
+<iscomment>Google Dynamic Remarketing. This asset will not be loaded from here. 
+It has been that way since before my time, so I'm not 'fixing' it, since our tracking apparently works with out.
+To make it load, move the iscontentasset to the pt_storefront template.</iscomment>
+<div>
+<iscontentasset aid="google-home-script" />
+</div>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+<noscript>
+<div style="display:inline;">
+<img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/1003276489/?value=0&amp;guid=ON&amp;script=0"/>
+</div>
+</noscript>
+
+<noscript>
+<div style="display:inline;">
+<img height="1" width="1" style="border-style:none;" alt="" src="http://www.googleadservices.com/pagead/conversion/1003276489/?label=Y82vCL_JywIQyZGz3gM&amp;guid=ON&amp;script=0"/>
+</div>
+</noscript>
+
+</isdecorate>
