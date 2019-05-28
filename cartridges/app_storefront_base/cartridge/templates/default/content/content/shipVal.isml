@@ -1,0 +1,1 @@
+${dw.system.Site.getCurrent().getCustomPreferenceValue('freeShipThreshold')}

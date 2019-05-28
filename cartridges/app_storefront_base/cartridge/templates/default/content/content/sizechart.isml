@@ -1,0 +1,32 @@
+<isinclude template="util/modules"/>
+<isinclude template="content/sizechartnav"/>
+
+<iscomment>make sure we have an asset at all</iscomment>
+<isif condition="${pdict.Content != null}">
+	<isif condition="${'body' in pdict.Content.custom && pdict.Content.custom.body != null}">
+		<div class="sizeChart"><!-- dwMarker="content" dwContentID="${pdict.Content.UUID}" -->
+			<isprint value="${pdict.Content.custom.body}" encoding="off"/>
+		</div> <!-- End sizeChart -->
+		<script>
+			$("li.${pdict.Content.ID}").addClass("active").children("a").attr("href","#");
+			$(".scTable > a").click(function(e){
+			   e.preventDefault();
+			   $(this).parent().toggleClass("closed");
+			});
+			$(".scTable li").hover(function(){
+				var that=$(this),
+				    index=that.attr("data-index");
+				that.addClass("active");
+				that.closest(".scTable").find(".rowIndex"+index).addClass("active");
+			},function(){
+				var that=$(this),
+				    index=that.attr("data-index");
+				that.removeClass("active");
+				that.closest(".scTable").find(".rowIndex"+index).removeClass("active")
+			});
+		</script>
+		<iscontentasset aid="sc-Includes" />
+	<iselse/>
+		${Resource.msg('global.nocontent','locale',null)}
+	</isif>
+</isif>

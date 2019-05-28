@@ -159,4 +159,9 @@ server.get('Show', cache.applyDefaultCache, consentTracking.consent, function (r
     next();
 }, pageMetaData.computedPageMetaData);
 
+server.get('IncludeNoDiv', cache.applyDefaultCache, consentTracking.consent, function (req, res, next) {
+     res.render('/content/content/contentassetincludeNoDiv')
+     next();
+}, pageMetaData.computedPageMetaData);
+
 module.exports = server.exports();
